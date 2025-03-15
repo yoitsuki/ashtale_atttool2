@@ -10,7 +10,23 @@
     <div class="container">
         <h1>ステータス計算</h1>
         <form id="status-form">
-            <label>職業: <input type="text" id="job"></label>
+            <div class="job-selection">
+                <p>職業を選択:</p>
+                <div class="radio-group">
+                    <label><input type="radio" name="job" value="パラディン"> パラディン</label>
+                    <label><input type="radio" name="job" value="ベルセルク"> ベルセルク</label>
+                    <label><input type="radio" name="job" value="アサシン"> アサシン</label>
+                    <label><input type="radio" name="job" value="スレイヤー"> スレイヤー</label>
+                    <label><input type="radio" name="job" value="メイジ"> メイジ</label>
+                    <label><input type="radio" name="job" value="ソーサラー"> ソーサラー</label>
+                    <label><input type="radio" name="job" value="ビショップ"> ビショップ</label>
+                    <label><input type="radio" name="job" value="シャーマン"> シャーマン</label>
+                    <label><input type="radio" name="job" value="ニャンター"> ニャンター</label>
+                    <label><input type="radio" name="job" value="羅刹"> 羅刹</label>
+                    <label><input type="radio" name="job" value="プレアデス"> プレアデス</label>
+                </div>
+            </div>
+
             <label>敵防御力: <input type="number" id="enemy_def"></label>
             <label>物理/魔法攻撃力: <input type="number" id="atk"></label>
             <label>力/知力: <input type="number" id="str_int"></label>
@@ -24,10 +40,12 @@
             <label>状態異常与ダメ増: <input type="number" id="status_damage"></label>
             <label>対高HP与ダメ増: <input type="number" id="high_hp_damage"></label>
             <label>対低HP与ダメ増: <input type="number" id="low_hp_damage"></label>
+            
             <button type="button" id="calculate">計算</button>
             <button type="button" id="clear">クリア</button>
             <button type="button" id="save">保存</button>
         </form>
+
         <table id="result-table">
             <thead>
                 <tr>
