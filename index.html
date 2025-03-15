@@ -10,22 +10,43 @@
     <div class="container">
         <h1>ステータス計算</h1>
         <form id="status-form">
-            <div class="job-selection">
-                <p>職業を選択:</p>
-                <div class="radio-group">
-                    <label><input type="radio" name="job" value="パラディン"> パラディン</label>
-                    <label><input type="radio" name="job" value="ベルセルク"> ベルセルク</label>
-                    <label><input type="radio" name="job" value="アサシン"> アサシン</label>
-                    <label><input type="radio" name="job" value="スレイヤー"> スレイヤー</label>
-                    <label><input type="radio" name="job" value="メイジ"> メイジ</label>
-                    <label><input type="radio" name="job" value="ソーサラー"> ソーサラー</label>
-                    <label><input type="radio" name="job" value="ビショップ"> ビショップ</label>
-                    <label><input type="radio" name="job" value="シャーマン"> シャーマン</label>
-                    <label><input type="radio" name="job" value="ニャンター"> ニャンター</label>
-                    <label><input type="radio" name="job" value="羅刹"> 羅刹</label>
-                    <label><input type="radio" name="job" value="プレアデス"> プレアデス</label>
-                </div>
-            </div>
+ <div class="job-selection">
+    <p>職業を選択:</p>
+    <div class="radio-group">
+        <input type="radio" name="job" value="パラディン" id="job-paladin">
+        <label for="job-paladin">パラディン</label>
+
+        <input type="radio" name="job" value="ベルセルク" id="job-berserk">
+        <label for="job-berserk">ベルセルク</label>
+
+        <input type="radio" name="job" value="アサシン" id="job-assassin">
+        <label for="job-assassin">アサシン</label>
+
+        <input type="radio" name="job" value="スレイヤー" id="job-slayer">
+        <label for="job-slayer">スレイヤー</label>
+
+        <input type="radio" name="job" value="メイジ" id="job-mage">
+        <label for="job-mage">メイジ</label>
+
+        <input type="radio" name="job" value="ソーサラー" id="job-sorcerer">
+        <label for="job-sorcerer">ソーサラー</label>
+
+        <input type="radio" name="job" value="ビショップ" id="job-bishop">
+        <label for="job-bishop">ビショップ</label>
+
+        <input type="radio" name="job" value="シャーマン" id="job-shaman">
+        <label for="job-shaman">シャーマン</label>
+
+        <input type="radio" name="job" value="ニャンター" id="job-nyanter">
+        <label for="job-nyanter">ニャンター</label>
+
+        <input type="radio" name="job" value="羅刹" id="job-rasetsu">
+        <label for="job-rasetsu">羅刹</label>
+
+        <input type="radio" name="job" value="プレアデス" id="job-pleiades">
+        <label for="job-pleiades">プレアデス</label>
+    </div>
+</div>
 
             <label>敵防御力: <input type="number" id="enemy_def"></label>
             <label>物理/魔法攻撃力: <input type="number" id="atk"></label>
