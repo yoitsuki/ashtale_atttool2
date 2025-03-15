@@ -138,14 +138,5 @@ th {
 }
 
 /* スマホ対応 */
-@media screen and (max-width: 400px) {
-    .radio-group {
-        grid-template-columns: repeat(2, 1fr); /* 画面が狭い場合は2列 */
-    }
-}
-
-@media screen and (max-width: 320px) {
-    .radio-group {
-        grid-template-columns: repeat(1, 1fr); /* 超狭い画面では1列 */
-    }
+@media screen and (max-width: 480px) {
 }
