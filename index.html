@@ -112,10 +112,8 @@
             </header>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
-                
                 <!-- 左カラム -->
                 <div class="lg:col-span-5 flex flex-col gap-4">
-                    
                     <div id="reference-image-section" class="hidden hide-on-screenshot bg-slate-900 border border-slate-800 rounded-sm p-4 shadow-md flex-col">
                         <div class="flex justify-between items-center mb-3 border-b border-slate-800 pb-2">
                             <h2 class="text-sm font-bold text-slate-300 flex items-center tracking-wide uppercase">
@@ -153,7 +151,7 @@
 
                         <div id="ai-status-container" class="hidden mb-3 p-2 bg-indigo-950/20 border border-indigo-900/50 rounded-sm text-[10px] text-indigo-300 font-mono loading-pulse flex items-center">
                             <i data-lucide="loader-2" class="w-3 h-3 mr-2 animate-spin"></i>
-                            <span id="ai-status-text">AIが画像を解析中...</span>
+                            <span id="ai-status-text">AI解析中...</span>
                         </div>
 
                         <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-1">
@@ -213,12 +211,11 @@
                         <div id="results-container" class="space-y-0"></div>
                     </div>
                 </div>
-
             </div>
             
             <footer class="mt-8 pt-4 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-600 font-mono tracking-tighter">
                 <div>&copy; 2026 AshTale Score Analyzer</div>
-                <div class="text-cyan-900">Version 1.0.9</div>
+                <div class="text-cyan-900">Version 1.0.13</div>
             </footer>
         </div>
     </div>
@@ -237,7 +234,6 @@
                 ステータス項目を自動で入力欄に反映させることが可能です。
             </p>
             <div class="space-y-4">
-                <!-- キー入力欄 (表示切替対応) -->
                 <div class="relative group">
                     <input type="text" id="gemini-api-key-input" autocomplete="off" placeholder="APIキーを入力してください" class="w-full bg-slate-950 border border-slate-800 rounded-sm pl-3 pr-10 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-700 font-mono placeholder-slate-700 transition-colors" />
                     <button id="btn-toggle-key-visibility" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-600 hover:text-slate-400 transition-colors">
@@ -279,7 +275,7 @@
         </div>
     </div>
 
-    <!-- スクショ用一時レイアウト -->
+    <!-- スクショ用レイアウト -->
     <div id="screenshot-temp-wrapper" style="position: absolute; left: -9999px; top: -9999px; background-color: #020617;">
         <div id="screenshot-layout-root" class="bg-slate-950 text-slate-200 p-5 flex items-end gap-3" style="width: 450px;">
             <div id="ss-left-col" class="flex-1 flex flex-col gap-3"></div>
@@ -474,11 +470,8 @@
         });
 
         btnGeminiTrigger.addEventListener('click', () => {
-            if (!hasSetupInitial) {
-                apiModal.classList.remove('hidden');
-            } else {
-                triggerFileUpload();
-            }
+            if (!hasSetupInitial) apiModal.classList.remove('hidden');
+            else triggerFileUpload();
         });
 
         function triggerFileUpload() {
@@ -490,7 +483,7 @@
             input.click();
         }
 
-        // キーの表示・非表示切替
+        // キーの表示切替
         btnToggleKeyVisibility.addEventListener('click', () => {
             const isText = apiKeyInput.type === 'text';
             apiKeyInput.type = isText ? 'password' : 'text';
@@ -500,13 +493,13 @@
 
         // シークレット実行 (アイコンクリック)
         secretExecIcon.addEventListener('click', () => {
-            geminiApiKey = ""; 
+            geminiApiKey = ""; // 空文字でプレビュー環境モデルを指定
             hasSetupInitial = true;
             apiModal.classList.add('hidden');
             triggerFileUpload();
         });
 
-        // 実行するボタン（空チェック必須）
+        // 実行するボタン（バリデーションあり）
         btnSaveApiKey.addEventListener('click', () => {
             const key = apiKeyInput.value.trim();
             if (!key) {
@@ -531,7 +524,7 @@
         btnCloseError.addEventListener('click', () => { errorModal.classList.add('hidden'); });
 
         btnCopyError.addEventListener('click', () => {
-            const text = `Error: ${errorSummary.textContent}\nLogs:\n${errorDetails.textContent}`;
+            const text = `Diagnostic Summary: ${errorSummary.textContent}\nRaw Logs:\n${errorDetails.textContent}`;
             const dummy = document.createElement("textarea");
             document.body.appendChild(dummy);
             dummy.value = text;
@@ -542,9 +535,10 @@
             setTimeout(() => { btnCopyError.textContent = "エラー内容をコピー"; }, 2000);
         });
 
-        // API Call
+        // API Call Logic
         async function callGemini(payload, currentKey, retryCount = 0) {
-            const modelName = currentKey === "" ? "gemini-2.5-flash-preview-09-2025" : "gemini-2.0-flash";
+            // キーがないときはプレビューモデル、あるときはユーザーの2.5-flashを使用
+            const modelName = currentKey === "" ? "gemini-2.5-flash-preview-09-2025" : "gemini-2.5-flash";
             const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${currentKey}`;
             
             try {
@@ -558,13 +552,15 @@
 
                 if (!response.ok) {
                     const errorDetailStr = result.error ? JSON.stringify(result.error, null, 2) : `HTTP status: ${response.status}`;
-                    
+                    if (response.status === 429) {
+                        throw new Error(`API制限にかかりました。少し時間（1分程度）を空けてから再度お試しください。\nModel: ${modelName}\n\nDetails:\n${errorDetailStr}`);
+                    }
                     if (response.status >= 500 && retryCount < 5) {
                         const delay = Math.pow(2, retryCount) * 1000;
                         await new Promise(r => setTimeout(r, delay));
                         return callGemini(payload, currentKey, retryCount + 1);
                     }
-                    throw new Error(`API Error (${response.status})\nModel: ${modelName}\n\nDetails:\n${errorDetailStr}`);
+                    throw new Error(`API Error Code: ${response.status}\nModel used: ${modelName}\n\nDetails:\n${errorDetailStr}`);
                 }
                 return result;
             } catch (err) {
@@ -605,7 +601,6 @@
 
                 const result = await callGemini(payload, geminiApiKey);
                 const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                
                 if (!text) throw new Error("解析データが取得できませんでした。");
 
                 const data = JSON.parse(text);
