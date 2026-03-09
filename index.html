@@ -55,7 +55,6 @@
             50% { opacity: .4; }
         }
         
-        /* 隠しボタンのアニメーション */
         #btn-gemini-trigger.hidden { display: none; }
         #btn-gemini-trigger.visible {
             display: flex;
@@ -66,7 +65,6 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* 入力エラー時の震動アニメーション */
         .shake {
             animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
         }
@@ -118,7 +116,6 @@
                 <!-- 左カラム -->
                 <div class="lg:col-span-5 flex flex-col gap-4">
                     
-                    <!-- 参照画像 -->
                     <div id="reference-image-section" class="hidden hide-on-screenshot bg-slate-900 border border-slate-800 rounded-sm p-4 shadow-md flex-col">
                         <div class="flex justify-between items-center mb-3 border-b border-slate-800 pb-2">
                             <h2 class="text-sm font-bold text-slate-300 flex items-center tracking-wide uppercase">
@@ -135,7 +132,6 @@
                         <div id="image-thumbnails" class="mt-3 flex gap-2 overflow-x-auto custom-scrollbar pb-1" style="display: none;"></div>
                     </div>
 
-                    <!-- ステータス入力 -->
                     <div class="bg-slate-900 border border-slate-800 rounded-sm p-4 shadow-md relative" id="ui-status">
                         <div class="flex justify-between items-center mb-3 border-b border-slate-800 pb-2">
                             <h2 class="text-sm font-bold text-slate-300 flex items-center">
@@ -143,7 +139,7 @@
                                     <i data-lucide="target" class="w-4 h-4 text-blue-500 pointer-events-none"></i>
                                 </span>
                                 現在のステータス
-                                <button id="btn-gemini-trigger" class="hidden ml-3 p-1 rounded-sm bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/40 transition-all border border-indigo-500/30" title="AIステータス解析">
+                                <button id="btn-gemini-trigger" class="hidden ml-3 p-1 rounded-sm bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/40 transition-all border border-indigo-500/30">
                                     <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
                                 </button>
                             </h2>
@@ -155,14 +151,12 @@
                             </div>
                         </div>
 
-                        <!-- AI解析ステータス -->
                         <div id="ai-status-container" class="hidden mb-3 p-2 bg-indigo-950/20 border border-indigo-900/50 rounded-sm text-[10px] text-indigo-300 font-mono loading-pulse flex items-center">
                             <i data-lucide="loader-2" class="w-3 h-3 mr-2 animate-spin"></i>
                             <span id="ai-status-text">AIが画像を解析中...</span>
                         </div>
 
                         <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-1">
-                            <!-- 各入力項目 -->
                             <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
                                 <label class="flex items-center text-xs font-medium text-slate-400"><i data-lucide="sword" class="w-3.5 h-3.5 mr-2 text-cyan-600"></i><span>攻撃力</span></label>
                                 <input type="text" id="input-atk" class="w-28 sm:w-32 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
@@ -224,7 +218,7 @@
             
             <footer class="mt-8 pt-4 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-600 font-mono tracking-tighter">
                 <div>&copy; 2026 AshTale Score Analyzer</div>
-                <div class="text-cyan-900">Version 1.0.8</div>
+                <div class="text-cyan-900">Version 1.0.9</div>
             </footer>
         </div>
     </div>
@@ -243,7 +237,13 @@
                 ステータス項目を自動で入力欄に反映させることが可能です。
             </p>
             <div class="space-y-4">
-                <input type="password" id="gemini-api-key-input" placeholder="APIキーを入力してください" class="w-full bg-slate-950 border border-slate-800 rounded-sm px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-700 font-mono placeholder-slate-700 transition-colors" />
+                <!-- キー入力欄 (表示切替対応) -->
+                <div class="relative group">
+                    <input type="text" id="gemini-api-key-input" autocomplete="off" placeholder="APIキーを入力してください" class="w-full bg-slate-950 border border-slate-800 rounded-sm pl-3 pr-10 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-700 font-mono placeholder-slate-700 transition-colors" />
+                    <button id="btn-toggle-key-visibility" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-600 hover:text-slate-400 transition-colors">
+                        <i data-lucide="eye" id="icon-key-visibility" class="w-4 h-4"></i>
+                    </button>
+                </div>
                 <div class="flex gap-2">
                     <button id="btn-save-api-key" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold py-2.5 rounded-sm transition-all uppercase tracking-widest active:scale-95 shadow-lg">
                         実行する
@@ -339,6 +339,8 @@
         const btnGeminiTrigger = document.getElementById('btn-gemini-trigger');
         const apiModal = document.getElementById('api-modal');
         const apiKeyInput = document.getElementById('gemini-api-key-input');
+        const btnToggleKeyVisibility = document.getElementById('btn-toggle-key-visibility');
+        const iconKeyVisibility = document.getElementById('icon-key-visibility');
         const btnSaveApiKey = document.getElementById('btn-save-api-key');
         const btnCloseApiModal = document.getElementById('btn-close-api-modal');
         const secretExecIcon = document.getElementById('secret-exec-icon');
@@ -456,7 +458,7 @@
             });
         });
 
-        // 隠しボタンのトリガー
+        // 隠しボタンのトリガー (ダブルクリック)
         let iconClickCount = 0;
         let iconClickTimer;
         statusIcon.addEventListener('click', () => {
@@ -488,7 +490,15 @@
             input.click();
         }
 
-        // シークレット実行
+        // キーの表示・非表示切替
+        btnToggleKeyVisibility.addEventListener('click', () => {
+            const isText = apiKeyInput.type === 'text';
+            apiKeyInput.type = isText ? 'password' : 'text';
+            iconKeyVisibility.setAttribute('data-lucide', isText ? 'eye-off' : 'eye');
+            lucide.createIcons();
+        });
+
+        // シークレット実行 (アイコンクリック)
         secretExecIcon.addEventListener('click', () => {
             geminiApiKey = ""; 
             hasSetupInitial = true;
@@ -496,7 +506,7 @@
             triggerFileUpload();
         });
 
-        // キーあり実行
+        // 実行するボタン（空チェック必須）
         btnSaveApiKey.addEventListener('click', () => {
             const key = apiKeyInput.value.trim();
             if (!key) {
@@ -521,7 +531,7 @@
         btnCloseError.addEventListener('click', () => { errorModal.classList.add('hidden'); });
 
         btnCopyError.addEventListener('click', () => {
-            const text = `Diagnostic Summary: ${errorSummary.textContent}\nRaw Logs:\n${errorDetails.textContent}`;
+            const text = `Error: ${errorSummary.textContent}\nLogs:\n${errorDetails.textContent}`;
             const dummy = document.createElement("textarea");
             document.body.appendChild(dummy);
             dummy.value = text;
@@ -532,9 +542,8 @@
             setTimeout(() => { btnCopyError.textContent = "エラー内容をコピー"; }, 2000);
         });
 
-        // API Call (Fixed Model Names)
+        // API Call
         async function callGemini(payload, currentKey, retryCount = 0) {
-            // キーがないときはプレビューモデル名、あるときは安定版最新モデル名
             const modelName = currentKey === "" ? "gemini-2.5-flash-preview-09-2025" : "gemini-2.0-flash";
             const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${currentKey}`;
             
@@ -664,6 +673,7 @@
 
         btnScreenshot.addEventListener('click', async () => {
             document.body.style.cursor = 'wait';
+            const ssLayoutRoot = document.getElementById('screenshot-layout-root');
             const ssLeftCol = document.getElementById('ss-left-col');
             const ssRightCol = document.getElementById('ss-right-col');
             ssLeftCol.innerHTML = '';
@@ -721,7 +731,7 @@
             ssRightCol.appendChild(resultClone);
 
             setTimeout(() => {
-                html2canvas(document.getElementById('screenshot-layout-root'), { backgroundColor: '#020617', scale: 2, logging: false, useCORS: true, width: 450 }).then(canvas => {
+                html2canvas(ssLayoutRoot, { backgroundColor: '#020617', scale: 2, logging: false, useCORS: true, width: 450 }).then(canvas => {
                     document.body.style.cursor = 'default';
                     screenshotImage.src = canvas.toDataURL('image/png');
                     screenshotModal.classList.remove('hidden');
