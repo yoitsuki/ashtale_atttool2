@@ -443,9 +443,9 @@
             progressText.textContent = 'ワーカー初期化中...';
             progressPercent.textContent = '0%';
 
-            // タイムアウト用プロミス (15秒)
+            // タイムアウト用プロミス (15秒から60秒に延長)
             const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error("OCRの初期化がタイムアウトしました。環境制限により処理がブロックされている可能性があります。")), 15000)
+                setTimeout(() => reject(new Error("OCR処理がタイムアウトしました(60秒)。\n初回は言語データのダウンロード(約20MB)に時間がかかる場合があります。\n通信環境のよい場所で再度お試しください。")), 60000)
             );
 
             try {
@@ -454,7 +454,8 @@
                 const imageUrl = URL.createObjectURL(file);
                 
                 const ocrTask = async () => {
-                    const worker = await window.Tesseract.createWorker({
+                    // Tesseract.js v5 の推奨される安定した書き方に変更
+                    const worker = await window.Tesseract.createWorker('jpn+eng', 1, {
                         logger: m => {
                             if (m.status === 'recognizing text') {
                                 progressText.textContent = 'テキスト解析中...';
@@ -465,13 +466,11 @@
                                 progressText.textContent = 
                                     m.status === 'loading tesseract core' ? 'コアモジュール読込中...' : 
                                     m.status === 'initializing api' ? 'API初期化中...' : 
-                                    m.status === 'loading language traineddata' ? '言語データ読込中...' : '準備中...';
+                                    m.status === 'loading language traineddata' ? '言語データ(約20MB)読込中...' : '準備中...';
                             }
                         }
                     });
                     
-                    await worker.loadLanguage('jpn+eng');
-                    await worker.initialize('jpn+eng');
                     const { data: { text } } = await worker.recognize(imageUrl);
                     await worker.terminate();
                     
