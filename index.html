@@ -143,7 +143,7 @@
                                     <i data-lucide="target" class="w-4 h-4 text-blue-500 pointer-events-none"></i>
                                 </span>
                                 現在のステータス
-                                <button id="btn-gemini-trigger" class="hidden ml-3 p-1 rounded-sm bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/40 transition-all border border-indigo-500/30" title="AI解析を実行">
+                                <button id="btn-gemini-trigger" class="hidden ml-3 p-1 rounded-sm bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/40 transition-all border border-indigo-500/30" title="AIステータス解析">
                                     <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
                                 </button>
                             </h2>
@@ -162,7 +162,7 @@
                         </div>
 
                         <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-1">
-                            <!-- 入力項目 (省略なし) -->
+                            <!-- 各入力項目 -->
                             <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
                                 <label class="flex items-center text-xs font-medium text-slate-400"><i data-lucide="sword" class="w-3.5 h-3.5 mr-2 text-cyan-600"></i><span>攻撃力</span></label>
                                 <input type="text" id="input-atk" class="w-28 sm:w-32 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
@@ -224,7 +224,7 @@
             
             <footer class="mt-8 pt-4 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-600 font-mono tracking-tighter">
                 <div>&copy; 2026 AshTale Score Analyzer</div>
-                <div class="text-cyan-900">Version 1.0.7</div>
+                <div class="text-cyan-900">Version 1.0.8</div>
             </footer>
         </div>
     </div>
@@ -243,7 +243,7 @@
                 ステータス項目を自動で入力欄に反映させることが可能です。
             </p>
             <div class="space-y-4">
-                <input type="password" id="gemini-api-key-input" placeholder="APIキーを入力してください" class="w-full bg-slate-950 border border-slate-800 rounded-sm px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-700 font-mono placeholder-slate-700 transition-all" />
+                <input type="password" id="gemini-api-key-input" placeholder="APIキーを入力してください" class="w-full bg-slate-950 border border-slate-800 rounded-sm px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-700 font-mono placeholder-slate-700 transition-colors" />
                 <div class="flex gap-2">
                     <button id="btn-save-api-key" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold py-2.5 rounded-sm transition-all uppercase tracking-widest active:scale-95 shadow-lg">
                         実行する
@@ -279,7 +279,7 @@
         </div>
     </div>
 
-    <!-- スクショ用レイアウト -->
+    <!-- スクショ用一時レイアウト -->
     <div id="screenshot-temp-wrapper" style="position: absolute; left: -9999px; top: -9999px; background-color: #020617;">
         <div id="screenshot-layout-root" class="bg-slate-950 text-slate-200 p-5 flex items-end gap-3" style="width: 450px;">
             <div id="ss-left-col" class="flex-1 flex flex-col gap-3"></div>
@@ -456,7 +456,7 @@
             });
         });
 
-        // 隠しボタンのトリガー (ダブルクリック)
+        // 隠しボタンのトリガー
         let iconClickCount = 0;
         let iconClickTimer;
         statusIcon.addEventListener('click', () => {
@@ -488,9 +488,9 @@
             input.click();
         }
 
-        // シークレット実行 (キラキラアイコン)
+        // シークレット実行
         secretExecIcon.addEventListener('click', () => {
-            geminiApiKey = ""; // 空文字 = 内部プレビューモデルを使用
+            geminiApiKey = ""; 
             hasSetupInitial = true;
             apiModal.classList.add('hidden');
             triggerFileUpload();
@@ -521,7 +521,7 @@
         btnCloseError.addEventListener('click', () => { errorModal.classList.add('hidden'); });
 
         btnCopyError.addEventListener('click', () => {
-            const text = `Error: ${errorSummary.textContent}\nLogs:\n${errorDetails.textContent}`;
+            const text = `Diagnostic Summary: ${errorSummary.textContent}\nRaw Logs:\n${errorDetails.textContent}`;
             const dummy = document.createElement("textarea");
             document.body.appendChild(dummy);
             dummy.value = text;
@@ -532,10 +532,10 @@
             setTimeout(() => { btnCopyError.textContent = "エラー内容をコピー"; }, 2000);
         });
 
-        // API Call (Model Name Switching Logic)
+        // API Call (Fixed Model Names)
         async function callGemini(payload, currentKey, retryCount = 0) {
-            // キーがないときはプレビューモデル名、あるときは安定版モデル名(-latest必須)
-            const modelName = currentKey === "" ? "gemini-2.5-flash-preview-09-2025" : "gemini-1.5-flash-latest";
+            // キーがないときはプレビューモデル名、あるときは安定版最新モデル名
+            const modelName = currentKey === "" ? "gemini-2.5-flash-preview-09-2025" : "gemini-2.0-flash";
             const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${currentKey}`;
             
             try {
@@ -555,7 +555,7 @@
                         await new Promise(r => setTimeout(r, delay));
                         return callGemini(payload, currentKey, retryCount + 1);
                     }
-                    throw new Error(`API Error Code: ${response.status}\nModel used: ${modelName}\n\nDetails:\n${errorDetailStr}`);
+                    throw new Error(`API Error (${response.status})\nModel: ${modelName}\n\nDetails:\n${errorDetailStr}`);
                 }
                 return result;
             } catch (err) {
@@ -605,12 +605,12 @@
                 });
 
                 calculateAndRender();
-                aiStatusText.textContent = "読み込み完了！";
+                aiStatusText.textContent = "解析が完了しました！";
                 setTimeout(() => aiStatusContainer.classList.add('hidden'), 3000);
             } catch (err) {
                 console.error(err);
                 aiStatusContainer.classList.add('hidden');
-                showAnalysisError("AI解析エラー (404/403等の詳細)", err.message);
+                showAnalysisError("AI解析エラー", err.message);
             }
         }
 
