@@ -3,81 +3,523 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ステータス計算</title>
-    <link rel="stylesheet" href="style.css">
+    <title>AshTale 火力スコアアナライザ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tesseract.js for OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <!-- html2canvas for Screenshot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* カスタムスクロールバー等 */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(30, 41, 59, 0.8);
+            border-radius: 4px;
+        }
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+    </style>
 </head>
-<body>
-    <div class="container">
-        <h1>ステータス計算</h1>
-        <form id="status-form">
-            <div class="job-selection">
-                <p>職業を選択:</p>
-                <div class="radio-group">
-                    <input type="radio" name="job" value="パラディン" id="job-paladin">
-                    <label for="job-paladin">パラ</label>
+<body class="bg-slate-950 text-slate-200 selection:bg-cyan-900 selection:text-cyan-50">
+    <div class="min-h-screen p-4 md:p-6" id="capture-area">
+        <div class="max-w-5xl mx-auto">
             
-                    <input type="radio" name="job" value="ベルセルク" id="job-berserk">
-                    <label for="job-berserk">ベル</label>
-            
-                    <input type="radio" name="job" value="アサシン" id="job-assassin">
-                    <label for="job-assassin">アサ</label>
-            
-                    <input type="radio" name="job" value="スレイヤー" id="job-slayer">
-                    <label for="job-slayer">スレ</label>
-            
-                    <input type="radio" name="job" value="メイジ" id="job-mage">
-                    <label for="job-mage">メイジ</label>
-            
-                    <input type="radio" name="job" value="ソーサラー" id="job-sorcerer">
-                    <label for="job-sorcerer">ソサ</label>
-            
-                    <input type="radio" name="job" value="ビショップ" id="job-bishop">
-                    <label for="job-bishop">ビショ</label>
-            
-                    <input type="radio" name="job" value="シャーマン" id="job-shaman">
-                    <label for="job-shaman">シャマ</label>
-            
-                    <input type="radio" name="job" value="ニャンター" id="job-nyanter">
-                    <label for="job-nyanter">猫</label>
-            
-                    <input type="radio" name="job" value="羅刹" id="job-rasetsu">
-                    <label for="job-rasetsu">羅刹</label>
-            
-                    <input type="radio" name="job" value="プレアデス" id="job-pleiades">
-                    <label for="job-pleiades">プレ</label>
+            <!-- ヘッダー -->
+            <header class="mb-6 border-b border-slate-800 pb-4">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="text-center md:text-left">
+                        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center justify-center md:justify-start">
+                            <i data-lucide="flame" class="w-6 h-6 mr-3 text-cyan-400"></i>
+                            AshTale 火力スコアアナライザ
+                        </h1>
+                        <p class="text-slate-400 mt-2 text-xs md:text-sm">
+                            火力を1%上昇させるために必要なステータス量を逆算します。
+                        </p>
+                    </div>
+                    
+                    <!-- ツールバー (時計 & スクショ) -->
+                    <div class="flex flex-row items-center gap-3">
+                        <div id="current-time" class="flex items-center text-xs text-cyan-500 font-mono bg-cyan-950/40 px-3 py-2 rounded-sm border border-cyan-900/60 shadow-inner h-[34px]">
+                            <i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5 opacity-80"></i>
+                            <span id="time-display">--/--/-- --:--:--</span>
+                        </div>
+                        <button id="btn-screenshot" class="flex items-center px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-cyan-800/60 text-cyan-400 hover:text-cyan-300 rounded-sm text-xs font-bold transition-all shadow-[0_0_10px_rgba(8,145,178,0.1)] hover:shadow-[0_0_15px_rgba(8,145,178,0.2)] h-[34px]">
+                            <i data-lucide="camera" class="w-4 h-4 mr-1.5"></i>
+                            画面を保存
+                        </button>
+                    </div>
                 </div>
-            </div>
-            
-            <label>敵防御力: <input type="number" id="enemy_def"></label>
-            <label>物理/魔法攻撃力: <input type="number" id="atk"></label>
-            <label>力/知力: <input type="number" id="str_int"></label>
-            <label>素早さ/精神: <input type="number" id="agi_mind"></label>
-            <label>威圧: <input type="number" id="intimidation"></label>
-            <label>ダメージ倍率: <input type="number" id="damage_rate"></label>
-            <label>与ダメージ増加: <input type="number" id="damage_bonus"></label>
-            <label>会心ダメージ: <input type="number" id="crit_damage"></label>
-            <label>防御無視: <input type="number" id="ignore_def"></label>
-            <label>対ボス与ダメ増: <input type="number" id="boss_damage"></label>
-            <label>状態異常与ダメ増: <input type="number" id="status_damage"></label>
-            <label>対高HP与ダメ増: <input type="number" id="high_hp_damage"></label>
-            <label>対低HP与ダメ増: <input type="number" id="low_hp_damage"></label>
-            
-            <button type="button" id="calculate">計算</button>
-            <button type="button" id="clear">クリア</button>
-            <button type="button" id="save">保存</button>
-        </form>
+            </header>
 
-        <table id="result-table">
-            <thead>
-                <tr>
-                    <th>項目</th>
-                    <th>ステータス</th>
-                    <th>与ダメ増加率</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+                
+                <!-- 左カラム：入力エリア -->
+                <div class="lg:col-span-5 flex flex-col gap-4">
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-sm p-4 shadow-md relative">
+                        <div class="flex justify-between items-center mb-3 border-b border-slate-700/50 pb-2">
+                            <h2 class="text-base font-semibold text-slate-200 flex items-center">
+                                <i data-lucide="target" class="w-4 h-4 mr-2 text-blue-400"></i>
+                                現在のステータス
+                            </h2>
+                            
+                            <!-- 画像アップロードボタン -->
+                            <div>
+                                <input type="file" accept="image/*" class="hidden" id="image-upload" />
+                                <label id="upload-label" for="image-upload" class="flex items-center justify-center px-3 py-1.5 rounded-sm text-xs font-medium cursor-pointer transition-all duration-200 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.3)] hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] border-none">
+                                    <div id="upload-idle" class="flex items-center">
+                                        <i data-lucide="upload" class="w-3 h-3 mr-1.5"></i>画像から読込
+                                    </div>
+                                    <div id="upload-loading" class="hidden items-center">
+                                        <i data-lucide="loader-2" class="w-3.5 h-3.5 mr-1.5 animate-spin text-cyan-200"></i>解析中
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- プログレスバー -->
+                        <div id="ocr-progress-container" class="hidden mb-4 bg-slate-950 p-3 rounded-sm border border-cyan-900/40">
+                            <div class="flex justify-between text-xs text-cyan-400 mb-1 font-mono">
+                                <span id="ocr-progress-text" class="animate-pulse">準備中...</span>
+                                <span id="ocr-progress-percent">0%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 rounded-sm h-1.5 overflow-hidden border border-slate-700">
+                                <div id="ocr-progress-bar" class="bg-cyan-500 h-1.5 shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300 ease-out" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- エラー表示領域 -->
+                        <div id="ocr-error-container" class="hidden mb-4 p-3 bg-red-950/40 border border-red-800/80 rounded-sm shadow-inner">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center text-red-400 text-sm font-bold">
+                                    <i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i>OCRエラーが発生しました
+                                </div>
+                                <button id="btn-copy-error" class="flex items-center text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded border border-slate-600 transition-colors">
+                                    <i data-lucide="copy" class="w-3 h-3 mr-1.5"></i>コピー
+                                </button>
+                            </div>
+                            <div id="ocr-error-text" class="text-xs text-red-300/80 font-mono whitespace-pre-wrap break-all h-20 overflow-y-auto bg-black/40 p-2 rounded-sm border border-red-900/50 custom-scrollbar"></div>
+                        </div>
+
+                        <!-- 入力フィールド群 -->
+                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-1">
+                            <!-- 攻撃力 -->
+                            <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/70 hover:bg-slate-800/30 transition-colors">
+                                <label class="flex items-center text-sm font-medium text-slate-300"><i data-lucide="sword" class="w-4 h-4 mr-2 text-cyan-500 flex-shrink-0"></i><span class="truncate">攻撃力</span></label>
+                                <input type="text" id="input-atk" class="bg-slate-950 border border-slate-700 text-slate-100 text-right text-sm rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-500 transition-all font-mono placeholder-slate-600 w-28 sm:w-32" />
+                            </div>
+                            <!-- 威圧 -->
+                            <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/70 hover:bg-slate-800/30 transition-colors">
+                                <label class="flex items-center text-sm font-medium text-slate-300"><i data-lucide="eye" class="w-4 h-4 mr-2 text-cyan-500 flex-shrink-0"></i><span class="truncate">威圧</span></label>
+                                <input type="text" id="input-intimidation" class="bg-slate-950 border border-slate-700 text-slate-100 text-right text-sm rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-500 transition-all font-mono placeholder-slate-600 w-28 sm:w-32" />
+                            </div>
+                            <!-- ダメージ倍率 -->
+                            <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/70 hover:bg-slate-800/30 transition-colors">
+                                <label class="flex items-center text-sm font-medium text-slate-300"><i data-lucide="zap" class="w-4 h-4 mr-2 text-cyan-500 flex-shrink-0"></i><span class="truncate">ダメージ倍率</span></label>
+                                <input type="text" id="input-dmgMul" class="bg-slate-950 border border-slate-700 text-slate-100 text-right text-sm rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-500 transition-all font-mono placeholder-slate-600 w-28 sm:w-32" />
+                            </div>
+                            <!-- 与ダメージ増加 -->
+                            <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/70 hover:bg-slate-800/30 transition-colors">
+                                <label class="flex items-center text-sm font-medium text-slate-300"><i data-lucide="arrow-up-circle" class="w-4 h-4 mr-2 text-cyan-500 flex-shrink-0"></i><span class="truncate">与ダメージ増加</span></label>
+                                <input type="text" id="input-dmgInc" class="bg-slate-950 border border-slate-700 text-slate-100 text-right text-sm rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-500 transition-all font-mono placeholder-slate-600 w-28 sm:w-32" />
+                            </div>
+                            <!-- 会心ダメージ -->
+                            <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/70 hover:bg-slate-800/30 transition-colors">
+                                <label class="flex items-center text-sm font-medium text-slate-300"><i data-lucide="crosshair" class="w-4 h-4 mr-2 text-cyan-500 flex-shrink-0"></i><span class="truncate">会心ダメージ</span></label>
+                                <input type="text" id="input-critDmg" class="bg-slate-950 border border-slate-700 text-slate-100 text-right text-sm rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-500 transition-all font-mono placeholder-slate-600 w-28 sm:w-32" />
+                            </div>
+                            <!-- 防御無視 -->
+                            <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/70 hover:bg-slate-800/30 transition-colors">
+                                <label class="flex items-center text-sm font-medium text-slate-300"><i data-lucide="shield-alert" class="w-4 h-4 mr-2 text-cyan-500 flex-shrink-0"></i><span class="truncate">防御無視</span></label>
+                                <input type="text" id="input-defIgn" class="bg-slate-950 border border-slate-700 text-slate-100 text-right text-sm rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-500 transition-all font-mono placeholder-slate-600 w-28 sm:w-32" />
+                            </div>
+                            <!-- 対ボス与ダメ増 -->
+                            <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/70 hover:bg-slate-800/30 transition-colors">
+                                <label class="flex items-center text-sm font-medium text-slate-300"><i data-lucide="skull" class="w-4 h-4 mr-2 text-cyan-500 flex-shrink-0"></i><span class="truncate">対ボス与ダメ増</span></label>
+                                <input type="text" id="input-bossDmg" class="bg-slate-950 border border-slate-700 text-slate-100 text-right text-sm rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-500 transition-all font-mono placeholder-slate-600 w-28 sm:w-32" />
+                            </div>
+                            
+                            <div class="xl:col-span-2 mt-1">
+                                <p class="text-[10px] text-slate-500 mb-2 flex items-center">
+                                    <i data-lucide="info" class="w-3 h-3 mr-1"></i>以下の3項目は合算値ベースで評価されます
+                                </p>
+                            </div>
+                            
+                            <!-- 状態異常与ダメ増 -->
+                            <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/70 hover:bg-slate-800/30 transition-colors">
+                                <label class="flex items-center text-sm font-medium text-slate-300"><i data-lucide="zap" class="w-4 h-4 mr-2 text-cyan-500 flex-shrink-0"></i><span class="truncate">状態異常与ダメ増</span></label>
+                                <input type="text" id="input-statusDmg" class="bg-slate-950 border border-slate-700 text-slate-100 text-right text-sm rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-500 transition-all font-mono placeholder-slate-600 w-28 sm:w-32" />
+                            </div>
+                            <!-- 対高HP与ダメ増 -->
+                            <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/70 hover:bg-slate-800/30 transition-colors">
+                                <label class="flex items-center text-sm font-medium text-slate-300"><i data-lucide="target" class="w-4 h-4 mr-2 text-cyan-500 flex-shrink-0"></i><span class="truncate">対高HP与ダメ増</span></label>
+                                <input type="text" id="input-highHpDmg" class="bg-slate-950 border border-slate-700 text-slate-100 text-right text-sm rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-500 transition-all font-mono placeholder-slate-600 w-28 sm:w-32" />
+                            </div>
+                            <!-- 対低HP与ダメ増 -->
+                            <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/70 hover:bg-slate-800/30 transition-colors">
+                                <label class="flex items-center text-sm font-medium text-slate-300"><i data-lucide="target" class="w-4 h-4 mr-2 text-cyan-500 flex-shrink-0"></i><span class="truncate">対低HP与ダメ増</span></label>
+                                <input type="text" id="input-lowHpDmg" class="bg-slate-950 border border-slate-700 text-slate-100 text-right text-sm rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-500 transition-all font-mono placeholder-slate-600 w-28 sm:w-32" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右カラム：結果表示 & メモ -->
+                <div class="lg:col-span-7 flex flex-col gap-4">
+                    
+                    <!-- 結果表示 -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-sm p-4 md:p-5 shadow-md">
+                        <div class="mb-4 flex items-center border-b border-slate-700/50 pb-2">
+                            <i data-lucide="arrow-up-circle" class="w-5 h-5 mr-2 text-cyan-500"></i>
+                            <h2 class="text-lg font-bold text-slate-100">火力1%UPに必要なステータス</h2>
+                        </div>
+
+                        <div class="space-y-0" id="results-container">
+                            <div class="flex justify-between px-2 pb-1 text-[11px] font-medium text-slate-500 border-b border-slate-800">
+                                <span>ステータス名</span>
+                                <span>必要増加量</span>
+                            </div>
+                            <!-- 結果行はJSで動的に更新 -->
+                        </div>
+
+                        <div class="mt-5 p-3 bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400 leading-relaxed rounded-sm">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong>威圧の計算:</strong> 1増やすと0.1%ダメージが上昇する仕様に基づき、全体のダメージを1%引き上げるために必要な威圧の増加量を算出しています。</li>
+                                <li><strong>対高HP/低HP:</strong> 稼働率を50%と仮定し、状態異常与ダメ増の2倍の数値が必要になるよう計算しています。</li>
+                                <li>防御無視は敵防御力や上限に依存するため、計算対象外（---）としています。</li>
+                                <li>画像読み込み(OCR)は環境や画質により誤認識する場合があります。読み込み後は数値を必ず確認・修正してください。</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- メモ欄 -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-sm p-4 shadow-md">
+                        <div class="mb-3 flex items-center border-b border-slate-700/50 pb-2">
+                            <i data-lucide="file-text" class="w-4 h-4 mr-2 text-cyan-600"></i>
+                            <h3 class="text-sm font-bold text-slate-300">メモ / 記録用</h3>
+                        </div>
+                        <textarea placeholder="装備構成の比較や、後で見返すためのメモを自由に記述できます..." class="w-full bg-slate-950/50 border border-slate-700/80 rounded-sm p-3 text-sm text-slate-200 focus:outline-none focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600/50 transition-all font-mono resize-y min-h-[100px] placeholder-slate-700 custom-scrollbar shadow-inner"></textarea>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <!-- アプリケーションロジック -->
+    <script>
+        // Lucideアイコンの初期化
+        lucide.createIcons();
+
+        // 状態管理
+        const state = {
+            stats: {
+                atk: '530330', dmgMul: '12.31', dmgInc: '168.5', critDmg: '738.4', 
+                defIgn: '510.45', bossDmg: '178.45', statusDmg: '355.95', 
+                highHpDmg: '316.05', lowHpDmg: '285.6', intimidation: '8050.73'
+            },
+            points: {}
+        };
+
+        // DOM要素の取得
+        const inputs = {
+            atk: document.getElementById('input-atk'),
+            intimidation: document.getElementById('input-intimidation'),
+            dmgMul: document.getElementById('input-dmgMul'),
+            dmgInc: document.getElementById('input-dmgInc'),
+            critDmg: document.getElementById('input-critDmg'),
+            defIgn: document.getElementById('input-defIgn'),
+            bossDmg: document.getElementById('input-bossDmg'),
+            statusDmg: document.getElementById('input-statusDmg'),
+            highHpDmg: document.getElementById('input-highHpDmg'),
+            lowHpDmg: document.getElementById('input-lowHpDmg'),
+        };
+
+        const resultsContainer = document.getElementById('results-container');
+        const timeDisplay = document.getElementById('time-display');
+        const btnScreenshot = document.getElementById('btn-screenshot');
+        
+        // OCR UI 要素
+        const fileInput = document.getElementById('image-upload');
+        const uploadLabel = document.getElementById('upload-label');
+        const uploadIdle = document.getElementById('upload-idle');
+        const uploadLoading = document.getElementById('upload-loading');
+        const progressContainer = document.getElementById('ocr-progress-container');
+        const progressText = document.getElementById('ocr-progress-text');
+        const progressPercent = document.getElementById('ocr-progress-percent');
+        const progressBar = document.getElementById('ocr-progress-bar');
+        const errorContainer = document.getElementById('ocr-error-container');
+        const errorText = document.getElementById('ocr-error-text');
+        const btnCopyError = document.getElementById('btn-copy-error');
+
+        // 時計の更新処理
+        function updateTime() {
+            const now = new Date();
+            timeDisplay.textContent = now.toLocaleString('ja-JP', { 
+                year: 'numeric', month: '2-digit', day: '2-digit', 
+                hour: '2-digit', minute: '2-digit', second: '2-digit' 
+            });
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 結果行のHTMLを生成する関数
+        function createResultRow(label, value, isHighlight = false, unit = '') {
+            const displayUnit = (value !== '---' && value !== 0) ? unit : '';
+            const bgClass = isHighlight ? 'bg-cyan-950/20' : 'hover:bg-slate-800/20';
+            const labelClass = isHighlight ? 'text-cyan-300 font-semibold' : 'text-slate-300';
+            const valClass = isHighlight ? 'text-cyan-400' : 'text-slate-100';
+
+            return `
+                <div class="flex justify-between items-center py-2 px-2 border-b border-slate-800/60 transition-colors ${bgClass}">
+                    <span class="text-sm ${labelClass}">${label}</span>
+                    <div class="flex items-center">
+                        <span class="text-base font-mono font-bold ${valClass}">
+                            ${value}${displayUnit}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 計算ロジックと画面更新
+        function calculateAndRender() {
+            const v = {
+                atk: parseFloat(state.stats.atk) || 0,
+                dmgMul: parseFloat(state.stats.dmgMul) || 0,
+                dmgInc: parseFloat(state.stats.dmgInc) || 0,
+                critDmg: parseFloat(state.stats.critDmg) || 0,
+                bossDmg: parseFloat(state.stats.bossDmg) || 0,
+                statusDmg: parseFloat(state.stats.statusDmg) || 0,
+                highHpDmg: parseFloat(state.stats.highHpDmg) || 0,
+                lowHpDmg: parseFloat(state.stats.lowHpDmg) || 0,
+                intimidation: parseFloat(state.stats.intimidation) || 0,
+            };
+
+            const shlSum = v.statusDmg + v.highHpDmg + v.lowHpDmg;
+
+            const p = {
+                atk: v.atk * 0.01,
+                intimidation: 10 + (v.intimidation * 0.01),
+                dmgMul: v.dmgMul, 
+                dmgInc: v.dmgInc * 0.01,
+                critDmg: v.critDmg * 0.01,
+                bossDmg: v.bossDmg * 0.01,
+                statusDmg: shlSum * 0.01,
+                highHpDmg: shlSum * 0.02, 
+                lowHpDmg: shlSum * 0.02,  
+                defIgn: '---'
+            };
+
+            // 小数点丸め処理
+            Object.keys(p).forEach(key => {
+                if (typeof p[key] === 'number') {
+                    p[key] = p[key] > 0 ? p[key].toFixed(2) : 0;
+                }
+            });
+            state.points = p;
+
+            // 入力フィールドの値を更新
+            Object.keys(inputs).forEach(key => {
+                inputs[key].value = state.stats[key];
+            });
+
+            // 結果リストのレンダリング
+            let resultsHtml = `
+                <div class="flex justify-between px-2 pb-1 text-[11px] font-medium text-slate-500 border-b border-slate-800">
+                    <span>ステータス名</span>
+                    <span>必要増加量</span>
+                </div>
+            `;
+            resultsHtml += createResultRow('攻撃力', p.atk);
+            resultsHtml += createResultRow('威圧', p.intimidation, true); // ハイライト
+            resultsHtml += createResultRow('ダメージ倍率', p.dmgMul, false, '%');
+            resultsHtml += createResultRow('与ダメージ増加', p.dmgInc, false, '%');
+            resultsHtml += createResultRow('会心ダメージ', p.critDmg, false, '%');
+            resultsHtml += createResultRow('対ボス与ダメ増', p.bossDmg, false, '%');
+            resultsHtml += createResultRow('状態異常与ダメ増', p.statusDmg, false, '%');
+            resultsHtml += createResultRow('対高HP与ダメ増', p.highHpDmg, false, '%');
+            resultsHtml += createResultRow('対低HP与ダメ増', p.lowHpDmg, false, '%');
+            resultsHtml += createResultRow('防御無視', p.defIgn);
+
+            resultsContainer.innerHTML = resultsHtml;
+        }
+
+        // 入力イベントリスナーの設定
+        Object.keys(inputs).forEach(key => {
+            inputs[key].addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                    state.stats[key] = val;
+                    calculateAndRender();
+                } else {
+                    e.target.value = state.stats[key]; // 不正な文字は元に戻す
+                }
+            });
+        });
+
+        // 初期描画
+        calculateAndRender();
+
+        // スクリーンショット処理
+        btnScreenshot.addEventListener('click', () => {
+            const captureArea = document.getElementById('capture-area');
+            if (window.html2canvas && captureArea) {
+                // UI状態の一時変更 (スクショ時にカーソル等を消す用)
+                document.body.style.cursor = 'wait';
+                
+                html2canvas(captureArea, {
+                    backgroundColor: '#020617', // bg-slate-950
+                    scale: 2,
+                    logging: false,
+                    useCORS: true
+                }).then(canvas => {
+                    document.body.style.cursor = 'default';
+                    const link = document.createElement('a');
+                    link.download = `AshTaleScore_${new Date().getTime()}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }).catch(err => {
+                    document.body.style.cursor = 'default';
+                    console.error("Screenshot failed:", err);
+                    alert('スクリーンショットの保存に失敗しました。');
+                });
+            } else {
+                alert('機能の準備ができていません。少し待ってからお試しください。');
+            }
+        });
+
+        // OCR テキストパース処理
+        function parseOcrText(text) {
+            const lines = text.split('\n');
+            const newStats = { ...state.stats };
+
+            lines.forEach(line => {
+                const nums = line.replace(/,/g, '').match(/\d+(\.\d+)?/g);
+                if (!nums) return;
+                const lastNum = parseFloat(nums[nums.length - 1]);
+
+                if (line.includes('威圧')) newStats.intimidation = lastNum.toString();
+                else if (line.includes('攻撃力') && !line.includes('基礎')) newStats.atk = lastNum.toString();
+                else if (line.includes('ダメージ倍率') || line.includes('ダメ倍率')) newStats.dmgMul = lastNum.toString();
+                else if (line.includes('与ダメージ') || (line.includes('与ダメ増') && !line.includes('ボス') && !line.includes('異常') && !line.includes('HP'))) newStats.dmgInc = lastNum.toString();
+                else if (line.includes('会心')) newStats.critDmg = lastNum.toString();
+                else if (line.includes('防御無視')) newStats.defIgn = lastNum.toString();
+                else if (line.includes('対ボス') || line.includes('対ボス与ダメ増')) newStats.bossDmg = lastNum.toString();
+                else if (line.includes('状態異常')) newStats.statusDmg = lastNum.toString();
+                else if (line.includes('対高HP') || line.includes('高HP')) newStats.highHpDmg = lastNum.toString();
+                else if (line.includes('対低HP') || line.includes('低HP')) newStats.lowHpDmg = lastNum.toString();
+            });
+
+            state.stats = newStats;
+            calculateAndRender();
+        }
+
+        // OCR処理 (UI制御とTesseract呼び出し)
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // UIをローディング状態に
+            uploadLabel.classList.add('bg-slate-800', 'text-slate-500', 'cursor-not-allowed');
+            uploadLabel.classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-cyan-600', 'hover:from-blue-500', 'hover:to-cyan-500', 'text-white');
+            uploadIdle.classList.add('hidden');
+            uploadLoading.classList.remove('hidden');
+            uploadLoading.classList.add('flex');
+            
+            errorContainer.classList.add('hidden');
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '0%';
+            progressText.textContent = 'ワーカー初期化中...';
+            progressPercent.textContent = '0%';
+
+            // タイムアウト用プロミス (15秒)
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error("OCRの初期化がタイムアウトしました。環境制限により処理がブロックされている可能性があります。")), 15000)
+            );
+
+            try {
+                if (!window.Tesseract) throw new Error("Tesseract.js が読み込まれていません。");
+                
+                const imageUrl = URL.createObjectURL(file);
+                
+                const ocrTask = async () => {
+                    const worker = await window.Tesseract.createWorker({
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                progressText.textContent = 'テキスト解析中...';
+                                const pct = Math.round(m.progress * 100);
+                                progressPercent.textContent = `${pct}%`;
+                                progressBar.style.width = `${pct}%`;
+                            } else {
+                                progressText.textContent = 
+                                    m.status === 'loading tesseract core' ? 'コアモジュール読込中...' : 
+                                    m.status === 'initializing api' ? 'API初期化中...' : 
+                                    m.status === 'loading language traineddata' ? '言語データ読込中...' : '準備中...';
+                            }
+                        }
+                    });
+                    
+                    await worker.loadLanguage('jpn+eng');
+                    await worker.initialize('jpn+eng');
+                    const { data: { text } } = await worker.recognize(imageUrl);
+                    await worker.terminate();
+                    
+                    parseOcrText(text);
+                    URL.revokeObjectURL(imageUrl);
+                };
+
+                await Promise.race([ocrTask(), timeoutPromise]);
+
+            } catch (error) {
+                console.error('OCR Error:', error);
+                errorText.textContent = error.toString() + (error.stack ? `\n\nStack Trace:\n${error.stack}` : '');
+                errorContainer.classList.remove('hidden');
+            } finally {
+                // UI状態を元に戻す
+                uploadLabel.classList.remove('bg-slate-800', 'text-slate-500', 'cursor-not-allowed');
+                uploadLabel.classList.add('bg-gradient-to-r', 'from-blue-600', 'to-cyan-600', 'hover:from-blue-500', 'hover:to-cyan-500', 'text-white');
+                uploadLoading.classList.add('hidden');
+                uploadLoading.classList.remove('flex');
+                uploadIdle.classList.remove('hidden');
+                progressContainer.classList.add('hidden');
+                fileInput.value = ''; // リセット
+            }
+        });
+
+        // エラーコピー処理
+        btnCopyError.addEventListener('click', () => {
+            const errStr = errorText.textContent;
+            if (!errStr) return;
+            navigator.clipboard.writeText(errStr).then(() => {
+                alert('エラー内容をクリップボードにコピーしました。');
+            }).catch(err => {
+                console.error('コピー失敗', err);
+                // フォールバック
+                const textArea = document.createElement("textarea");
+                textArea.value = errStr;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    alert('エラー内容をクリップボードにコピーしました。');
+                } catch (e) {
+                    alert('コピーに失敗しました。');
+                }
+                document.body.removeChild(textArea);
+            });
+        });
+
+    </script>
 </body>
 </html>
