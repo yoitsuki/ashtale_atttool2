@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Tesseract.js for OCR -->
+    <!-- Tesseract.js (Fallback/Optional) -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <!-- html2canvas for Screenshot -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -56,6 +56,17 @@
             0%, 100% { opacity: 1; }
             50% { opacity: .4; }
         }
+        
+        /* 隠しボタンのアニメーション */
+        #btn-gemini-trigger.hidden { display: none; }
+        #btn-gemini-trigger.visible {
+            display: flex;
+            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200 selection:bg-cyan-900 selection:text-cyan-50">
@@ -87,7 +98,7 @@
                             </button>
                         </div>
                         <div class="w-full md:max-w-[320px]">
-                            <textarea id="input-memo-header" rows="1" placeholder="メモを入力（スクショに反映されます）" class="w-full bg-slate-950/30 border border-slate-800 hover:border-slate-700 rounded-sm px-3 py-1.5 text-[11px] text-slate-400 focus:outline-none focus:border-cyan-900/40 transition-all font-mono placeholder-slate-700 text-left"></textarea>
+                            <textarea id="input-memo-header" rows="1" placeholder="メモを入力（スクショに反映されます）" class="w-full bg-slate-950/50 border border-slate-800 hover:border-slate-700 rounded-sm px-3 py-1.5 text-[11px] text-slate-400 focus:outline-none focus:border-cyan-900/40 transition-all font-mono placeholder-slate-700 text-left"></textarea>
                         </div>
                     </div>
                 </div>
@@ -119,16 +130,15 @@
                     <div class="bg-slate-900 border border-slate-800 rounded-sm p-4 shadow-md relative" id="ui-status">
                         <div class="flex justify-between items-center mb-3 border-b border-slate-800 pb-2">
                             <h2 class="text-sm font-bold text-slate-300 flex items-center">
-                                <i data-lucide="target" class="w-4 h-4 mr-2 text-blue-500"></i>
+                                <span id="ui-status-icon" class="cursor-pointer select-none active:scale-95 transition-transform mr-2 block">
+                                    <i data-lucide="target" class="w-4 h-4 text-blue-500 pointer-events-none"></i>
+                                </span>
                                 現在のステータス
+                                <button id="btn-gemini-trigger" class="hidden ml-3 p-1 rounded-sm bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/40 transition-all border border-indigo-500/30" title="AIステータス解析">
+                                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                                </button>
                             </h2>
                             <div class="hide-on-screenshot flex items-center gap-2">
-                                <!-- OCR解析ボタン -->
-                                <input type="file" id="ocr-upload" accept="image/*" multiple class="hidden">
-                                <button id="btn-ocr" class="flex items-center justify-center w-[34px] h-[34px] bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-sm cursor-pointer transition-colors text-cyan-400" title="画像を読み込んで反転解析">
-                                    <i data-lucide="scan-text" class="w-4 h-4"></i>
-                                </button>
-                                
                                 <input type="file" id="image-upload" accept="image/*" multiple class="hidden">
                                 <label for="image-upload" class="flex items-center justify-center px-3 h-[34px] bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-sm text-[10px] font-bold cursor-pointer transition-colors text-slate-400">
                                     <i data-lucide="image-plus" class="w-3.5 h-3.5 mr-1.5 text-indigo-500"></i>画像を見ながら入力
@@ -136,19 +146,10 @@
                             </div>
                         </div>
 
-                        <!-- OCRプログレス・ログエリア -->
-                        <div id="ocr-status-container" class="hidden mb-3 space-y-2">
-                            <div class="p-2 bg-cyan-950/30 border border-cyan-900/50 rounded-sm text-[10px] text-cyan-400 font-mono loading-pulse flex items-center">
-                                <i data-lucide="loader-2" class="w-3 h-3 mr-2 animate-spin"></i>
-                                <span id="ocr-status-text">解析エンジン起動中...</span>
-                            </div>
-                            <div class="p-2 bg-black/40 border border-slate-800 rounded-sm">
-                                <div class="flex justify-between items-center mb-1">
-                                    <p class="text-[9px] text-slate-500 uppercase font-bold tracking-tighter">Analysis Results / Log:</p>
-                                    <span class="text-[8px] px-1 bg-slate-800 text-slate-400 rounded">Inverted BW Mode</span>
-                                </div>
-                                <div id="ocr-debug-log" class="text-[9px] text-slate-400 font-mono h-24 overflow-y-auto custom-scrollbar break-all whitespace-pre-wrap leading-relaxed border-t border-slate-800/50 pt-1"></div>
-                            </div>
+                        <!-- AI解析ステータス -->
+                        <div id="ai-status-container" class="hidden mb-3 p-2 bg-indigo-950/20 border border-indigo-900/50 rounded-sm text-[10px] text-indigo-300 font-mono loading-pulse flex items-center">
+                            <i data-lucide="loader-2" class="w-3 h-3 mr-2 animate-spin"></i>
+                            <span id="ai-status-text">AIが画像を解析中...</span>
                         </div>
 
                         <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-1">
@@ -213,8 +214,36 @@
             
             <footer class="mt-8 pt-4 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-600 font-mono tracking-tighter">
                 <div>&copy; 2026 AshTale Score Analyzer</div>
-                <div class="text-cyan-900">Version 0.1.27</div>
+                <div class="text-cyan-900">Version 1.0.4</div>
             </footer>
+        </div>
+    </div>
+
+    <!-- APIキー設定モーダル -->
+    <div id="api-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div class="bg-slate-900 border border-indigo-900/40 p-6 rounded-sm shadow-2xl w-full max-w-sm">
+            <div class="flex items-center gap-3 mb-4 text-indigo-400">
+                <!-- ここに隠し実行機能を設定 -->
+                <span id="secret-exec-icon" class="cursor-pointer active:scale-90 transition-transform">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                </span>
+                <h3 class="text-sm font-bold uppercase tracking-widest">AI Status Parser</h3>
+            </div>
+            <p class="text-[10px] text-slate-400 mb-5 leading-relaxed">
+                Google Gemini AIを使用して画像から数値を抽出します。<br>
+                ステータス項目を自動で入力欄に反映させることが可能です。
+            </p>
+            <div class="space-y-4">
+                <input type="password" id="gemini-api-key-input" placeholder="APIキーを入力してください" class="w-full bg-slate-950 border border-slate-800 rounded-sm px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-700 font-mono placeholder-slate-700" />
+                <div class="flex gap-2">
+                    <button id="btn-save-api-key" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold py-2.5 rounded-sm transition-all uppercase tracking-widest active:scale-95 shadow-lg">
+                        実行する
+                    </button>
+                    <button id="btn-close-api-modal" class="px-4 bg-slate-800 hover:bg-slate-700 text-slate-400 text-[11px] font-bold py-2.5 rounded-sm transition-all active:scale-95">
+                        閉じる
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -226,14 +255,14 @@
         </div>
     </div>
 
-    <!-- 保存用モーダル -->
+    <!-- スクショ保存用モーダル -->
     <div id="screenshot-modal" class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/95 backdrop-blur-sm p-4">
         <div class="bg-slate-900 border border-slate-800 p-4 rounded-sm shadow-2xl max-w-full max-h-full flex flex-col">
             <div class="flex justify-between items-center mb-4">
                 <p class="text-xs text-cyan-600 font-bold flex items-center">
                     <i data-lucide="download" class="w-3.5 h-3.5 mr-2"></i>画像を長押しして保存
                 </p>
-                <button id="btn-close-modal" class="text-slate-500 hover:text-white transition-colors bg-slate-800 p-1.5 rounded-full">
+                <button id="btn-close-modal" class="text-slate-500 hover:text-white transition-colors bg-slate-800 p-1.5 rounded-sm">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
@@ -245,6 +274,9 @@
 
     <script>
         lucide.createIcons();
+
+        let geminiApiKey = ""; 
+        let hasSetupInitial = false;
 
         const state = {
             stats: {
@@ -267,16 +299,19 @@
             lowHpDmg: document.getElementById('input-lowHpDmg'),
         };
 
-        const memoInputHeader = document.getElementById('input-memo-header');
         const resultsContainer = document.getElementById('results-container');
         const timeDisplay = document.getElementById('time-display');
         const btnScreenshot = document.getElementById('btn-screenshot');
         
-        const btnOcr = document.getElementById('btn-ocr');
-        const ocrUpload = document.getElementById('ocr-upload');
-        const ocrStatusContainer = document.getElementById('ocr-status-container');
-        const ocrStatusText = document.getElementById('ocr-status-text');
-        const ocrDebugLog = document.getElementById('ocr-debug-log');
+        const statusIcon = document.getElementById('ui-status-icon');
+        const btnGeminiTrigger = document.getElementById('btn-gemini-trigger');
+        const apiModal = document.getElementById('api-modal');
+        const apiKeyInput = document.getElementById('gemini-api-key-input');
+        const btnSaveApiKey = document.getElementById('btn-save-api-key');
+        const btnCloseApiModal = document.getElementById('btn-close-api-modal');
+        const secretExecIcon = document.getElementById('secret-exec-icon');
+        const aiStatusContainer = document.getElementById('ai-status-container');
+        const aiStatusText = document.getElementById('ai-status-text');
 
         const screenshotModal = document.getElementById('screenshot-modal');
         const screenshotImage = document.getElementById('screenshot-image');
@@ -301,19 +336,20 @@
         updateTime();
 
         function adjustMemoHeight() {
-            memoInputHeader.style.height = 'auto';
-            memoInputHeader.style.height = (memoInputHeader.scrollHeight) + 'px';
+            const memo = document.getElementById('input-memo-header');
+            memo.style.height = 'auto';
+            memo.style.height = memo.scrollHeight + 'px';
         }
-        memoInputHeader.addEventListener('input', adjustMemoHeight);
+        document.getElementById('input-memo-header').addEventListener('input', adjustMemoHeight);
 
         function createResultRow(label, value, key, unit = '', isScreenshot = false) {
             const displayUnit = (value !== '---' && value !== 0) ? unit : '';
             let infoBtnHtml = '';
             if (!isScreenshot) {
                 if (key === 'highHpDmg' || key === 'lowHpDmg') {
-                    infoBtnHtml = `<div class="relative group ml-1.5 inline-block"><i data-lucide="info" class="w-3 h-3 text-slate-600 cursor-help"></i><div class="absolute left-0 bottom-full mb-2 hidden group-hover:block z-50 w-48 p-2 bg-slate-800 text-[10px] text-slate-200 rounded shadow-lg border border-slate-700 info-popup">稼働率を50%と仮定し、計算しています。</div></div>`;
+                    infoBtnHtml = `<div class="relative group ml-1.5 inline-block"><i data-lucide="info" class="w-3 h-3 text-slate-600 cursor-help"></i><div class="absolute left-0 bottom-full mb-2 hidden group-hover:block z-50 w-48 p-2 bg-slate-800 text-[10px] text-slate-200 rounded shadow-lg border border-slate-700 info-popup">稼働率を50%と仮定。</div></div>`;
                 } else if (key === 'defIgn') {
-                    infoBtnHtml = `<div class="relative group ml-1.5 inline-block"><i data-lucide="info" class="w-3 h-3 text-slate-600 cursor-help"></i><div class="absolute left-0 bottom-full mb-2 hidden group-hover:block z-50 w-48 p-2 bg-slate-800 text-[10px] text-slate-200 rounded shadow-lg border border-slate-700 info-popup">敵防御力や上限に依存するため、計算対象外（---）としています。</div></div>`;
+                    infoBtnHtml = `<div class="relative group ml-1.5 inline-block"><i data-lucide="info" class="w-3 h-3 text-slate-600 cursor-help"></i><div class="absolute left-0 bottom-full mb-2 hidden group-hover:block z-50 w-48 p-2 bg-slate-800 text-[10px] text-slate-200 rounded shadow-lg border border-slate-700 info-popup">計算対象外。</div></div>`;
                 }
             }
             const rowClass = isScreenshot ? "flex justify-between items-center py-1 px-1 border-b border-slate-800/40" : "flex justify-between items-center py-2 px-2 border-b border-slate-800/40 hover:bg-slate-800/10 transition-colors";
@@ -381,28 +417,150 @@
             });
         });
 
-        function handleImageFiles(files, andOCR = false) {
+        // 隠しボタンのトリガー (ダブルクリック)
+        let iconClickCount = 0;
+        let iconClickTimer;
+        statusIcon.addEventListener('click', () => {
+            iconClickCount++;
+            clearTimeout(iconClickTimer);
+            if (iconClickCount >= 2) {
+                btnGeminiTrigger.classList.remove('hidden');
+                btnGeminiTrigger.classList.add('visible');
+                iconClickCount = 0;
+            } else {
+                iconClickTimer = setTimeout(() => { iconClickCount = 0; }, 300);
+            }
+        });
+
+        btnGeminiTrigger.addEventListener('click', () => {
+            if (!hasSetupInitial) {
+                apiModal.classList.remove('hidden');
+            } else {
+                triggerFileUpload();
+            }
+        });
+
+        function triggerFileUpload() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.multiple = true;
+            input.onchange = (e) => handleGeminiOcr(Array.from(e.target.files));
+            input.click();
+        }
+
+        // モーダルタイトルの左アイコン（秘密の実行機能）
+        secretExecIcon.addEventListener('click', () => {
+            geminiApiKey = ""; // プレビューモード
+            hasSetupInitial = true;
+            apiModal.classList.add('hidden');
+            triggerFileUpload();
+        });
+
+        // 実行するボタン（空チェック必須）
+        btnSaveApiKey.addEventListener('click', () => {
+            const key = apiKeyInput.value.trim();
+            if (!key) {
+                // 未入力なら警告（赤枠）を出して中断
+                apiKeyInput.classList.add('border-red-600');
+                setTimeout(() => apiKeyInput.classList.remove('border-red-600'), 2000);
+                return;
+            }
+            geminiApiKey = key; 
+            hasSetupInitial = true;
+            apiModal.classList.add('hidden');
+            triggerFileUpload();
+        });
+        
+        btnCloseApiModal.addEventListener('click', () => apiModal.classList.add('hidden'));
+
+        // API Call
+        async function callGemini(payload, currentKey, retryCount = 0) {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${currentKey}`;
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    if (response.status >= 500 && retryCount < 5) {
+                        const delay = Math.pow(2, retryCount) * 1000;
+                        await new Promise(r => setTimeout(r, delay));
+                        return callGemini(payload, currentKey, retryCount + 1);
+                    }
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                return await response.json();
+            } catch (err) {
+                if (retryCount < 5) {
+                    const delay = Math.pow(2, retryCount) * 1000;
+                    await new Promise(r => setTimeout(r, delay));
+                    return callGemini(payload, currentKey, retryCount + 1);
+                }
+                throw err;
+            }
+        }
+
+        async function handleGeminiOcr(files) {
+            if (!files.length) return;
+            aiStatusContainer.classList.remove('hidden');
+            aiStatusText.textContent = "AI解析を準備中...";
+
+            try {
+                const imageParts = await Promise.all(files.map(async file => {
+                    const base64 = await new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result.split(',')[1]);
+                        reader.readAsDataURL(file);
+                    });
+                    return { inlineData: { mimeType: file.type, data: base64 } };
+                }));
+
+                const systemPrompt = `AshTale(アッシュテイル)のステータス画面を解析してください。
+以下のJSON形式で数値を抽出してください（%記号は不要、抽出不可はnull）。
+{"atk":数, "intimidation":数, "dmgMul":数, "dmgInc":数, "critDmg":数, "defIgn":数, "bossDmg":数, "statusDmg":数, "highHpDmg":数, "lowHpDmg":数}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: "画像からステータス値を抽出してください。" }, ...imageParts] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: { responseMimeType: "application/json" }
+                };
+
+                const result = await callGemini(payload, geminiApiKey);
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!text) throw new Error("解析結果が得られませんでした。");
+
+                const data = JSON.parse(text);
+                Object.keys(data).forEach(key => {
+                    if (data[key] !== null) state.stats[key] = String(data[key]);
+                });
+
+                calculateAndRender();
+                aiStatusText.textContent = "ステータスを読み込みました！";
+                setTimeout(() => aiStatusContainer.classList.add('hidden'), 3000);
+            } catch (err) {
+                console.error(err);
+                aiStatusText.textContent = "解析に失敗しました。";
+                setTimeout(() => aiStatusContainer.classList.add('hidden'), 5000);
+            }
+        }
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
             if (files.length === 0) return;
             refImageSection.classList.remove('hidden');
-            let firstNewIdx = loadedImages.length;
-            files.forEach((file, i) => {
+            files.forEach(file => {
                 const reader = new FileReader();
-                reader.onload = (event) => {
-                    const dataUrl = event.target.result;
-                    loadedImages.push(dataUrl);
+                reader.onload = (ev) => {
+                    loadedImages.push(ev.target.result);
                     renderThumbnails();
-                    if (loadedImages.length === firstNewIdx + 1) {
-                        setMainImage(firstNewIdx);
-                        if (andOCR) runOCR();
-                    }
+                    if (loadedImages.length === 1) setMainImage(0);
                 };
                 reader.readAsDataURL(file);
             });
-        }
-
-        fileInput.addEventListener('change', (e) => handleImageFiles(Array.from(e.target.files)));
-        btnOcr.addEventListener('click', () => ocrUpload.click());
-        ocrUpload.addEventListener('change', (e) => handleImageFiles(Array.from(e.target.files), true));
+            fileInput.value = '';
+        });
 
         function renderThumbnails() {
             imageThumbnails.innerHTML = '';
@@ -410,21 +568,20 @@
                 imageThumbnails.style.display = 'none';
             } else {
                 imageThumbnails.style.display = 'flex';
-                loadedImages.forEach((dataUrl, index) => {
+                loadedImages.forEach((data, idx) => {
                     const img = document.createElement('img');
-                    img.src = dataUrl;
-                    const isSelected = index === selectedImgIndex;
+                    img.src = data;
+                    const isSelected = idx === selectedImgIndex;
                     img.className = `w-12 h-12 object-cover border-2 rounded-sm cursor-pointer transition-all flex-shrink-0 ${isSelected ? 'border-cyan-500 opacity-100' : 'border-transparent opacity-50 hover:opacity-100'}`;
-                    img.onclick = () => setMainImage(index);
+                    img.onclick = () => setMainImage(idx);
                     imageThumbnails.appendChild(img);
                 });
             }
         }
 
-        function setMainImage(index) {
-            selectedImgIndex = index;
-            const dataUrl = loadedImages[index];
-            mainReferenceImg.src = dataUrl;
+        function setMainImage(idx) {
+            selectedImgIndex = idx;
+            mainReferenceImg.src = loadedImages[idx];
             mainReferenceImg.style.display = 'block';
             renderThumbnails();
         }
@@ -435,83 +592,7 @@
             mainReferenceImg.src = '';
             mainReferenceImg.style.display = 'none';
             refImageSection.classList.add('hidden');
-            imageThumbnails.innerHTML = '';
         });
-
-        // OCR解析ロジック（白黒反転強化版）
-        async function preprocessImageForOCR(imgElement) {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = imgElement.naturalWidth;
-            canvas.height = imgElement.naturalHeight;
-            ctx.drawImage(imgElement, 0, 0);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            
-            for (let i = 0; i < data.length; i += 4) {
-                // グレースケール
-                const avg = (data[i] + data[i+1] + data[i+2]) / 3;
-                // 二値化 + 反転（暗い背景を白に、明るい文字を黒にする）
-                const v = avg < 140 ? 255 : 0; 
-                data[i] = data[i+1] = data[i+2] = v;
-            }
-            ctx.putImageData(imageData, 0, 0);
-            return canvas.toDataURL('image/png');
-        }
-
-        async function runOCR() {
-            if (!loadedImages.length) return;
-            ocrStatusContainer.classList.remove('hidden');
-            ocrDebugLog.textContent = "";
-            ocrStatusText.textContent = "OCRエンジン準備中...";
-            try {
-                const processedData = await preprocessImageForOCR(mainReferenceImg);
-                const worker = await Tesseract.createWorker('jpn+eng');
-                // Tabularな構造を読みやすくするため、PageSegModeを指定
-                await worker.setParameters({
-                    tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK,
-                });
-                
-                ocrStatusText.textContent = "テキストをスキャン中(反転モード)...";
-                const { data: { text } } = await worker.recognize(processedData);
-                await worker.terminate();
-
-                ocrDebugLog.textContent = text;
-                ocrStatusText.textContent = "データを抽出中...";
-                
-                const lines = text.split('\n');
-                const newStats = { ...state.stats };
-                lines.forEach(line => {
-                    const cleanLine = line.replace(/,/g, '').replace(/[oOＯｏ]/g, '0').replace(/[lIｌＩ]/g, '1');
-                    const match = cleanLine.match(/(\d+\.?\d*)/g);
-                    if (!match) return;
-                    const lastVal = match[match.length - 1];
-
-                    // 漢字が化けていても特定のキーワードでヒットさせる
-                    if (line.includes('攻') || line.includes('撃')) newStats.atk = lastVal;
-                    else if (line.includes('威') || line.includes('圧')) newStats.intimidation = lastVal;
-                    else if (line.includes('倍') || line.includes('率')) newStats.dmgMul = lastVal;
-                    else if (line.includes('与') && !line.includes('ボ') && !line.includes('異') && !line.includes('HP')) newStats.dmgInc = lastVal;
-                    else if (line.includes('会') || line.includes('心')) newStats.critDmg = lastVal;
-                    else if (line.includes('無') || line.includes('視')) newStats.defIgn = lastVal;
-                    else if (line.includes('ボ') || line.includes('ス')) newStats.bossDmg = lastVal;
-                    else if (line.includes('異') || line.includes('状')) newStats.statusDmg = lastVal;
-                    else if (line.includes('高') || line.includes('H') || line.includes('P')) {
-                        if (line.includes('高')) newStats.highHpDmg = lastVal;
-                        else if (line.includes('低')) newStats.lowHpDmg = lastVal;
-                    }
-                });
-
-                Object.assign(state.stats, newStats);
-                calculateAndRender();
-                ocrStatusText.textContent = "解析完了！";
-                setTimeout(() => ocrStatusContainer.classList.add('hidden'), 5000);
-            } catch (err) {
-                console.error(err);
-                ocrStatusText.textContent = "解析エラー。通信環境等を確認してください。";
-                setTimeout(() => ocrStatusContainer.classList.add('hidden'), 3000);
-            }
-        }
 
         btnScreenshot.addEventListener('click', async () => {
             document.body.style.cursor = 'wait';
@@ -519,22 +600,16 @@
             const ssRightCol = document.getElementById('ss-right-col');
             ssLeftCol.innerHTML = '';
             ssRightCol.innerHTML = '';
+
             const headerClone = document.getElementById('ui-header').cloneNode(true);
-            headerClone.className = "border-b border-slate-800 pb-1 mb-1 ss-header-fix";
+            headerClone.className = "border-b border-slate-800 pb-1 mb-1";
             const h1 = headerClone.querySelector('h1');
-            if (h1) {
-                h1.className = "ss-no-wrap font-extrabold tracking-tighter";
-                h1.style.cssText = "background:none !important; color:#22d3ee !important; -webkit-text-fill-color:#22d3ee !important; font-size:14px !important; line-height:1 !important;";
-            }
+            if (h1) h1.style.cssText = "background:none !important; color:#22d3ee !important; -webkit-text-fill-color:#22d3ee !important; font-size:14px !important; line-height:1 !important;";
             headerClone.querySelector('p')?.remove();
-            const timeInfo = headerClone.querySelector('#current-time');
-            if (timeInfo) {
-                timeInfo.className = "bg-transparent border-none p-0 text-[7px] h-auto flex items-center text-slate-600 font-mono mt-0.5";
-                timeInfo.querySelector('i')?.remove();
-            }
+            headerClone.querySelector('#current-time').querySelector('i')?.remove();
             const memoTextarea = headerClone.querySelector('textarea');
             if (memoTextarea) {
-                const val = memoInputHeader.value.trim();
+                const val = document.getElementById('input-memo-header').value.trim();
                 const display = document.createElement('div');
                 display.className = "text-[7px] text-slate-400 font-mono text-left whitespace-pre-wrap leading-tight mt-1 px-1 border-l border-slate-800";
                 display.textContent = val || "";
@@ -543,9 +618,10 @@
             }
             headerClone.querySelector('button')?.remove();
             ssLeftCol.appendChild(headerClone);
+
             const statusClone = document.getElementById('ui-status').cloneNode(true);
-            statusClone.className = "bg-slate-900/50 border border-slate-800 rounded-sm p-2 shadow-md flex-1";
-            statusClone.querySelector('h2').className = "text-[8px] font-bold text-slate-400 flex items-center mb-1 ss-no-wrap";
+            statusClone.className = "bg-slate-900/50 border border-slate-800 rounded-sm p-2 flex-1";
+            statusClone.querySelector('h2').className = "text-[8px] font-bold text-slate-400 mb-1 ss-no-wrap";
             statusClone.querySelectorAll('.flex.justify-between').forEach(row => {
                 const input = row.querySelector('input');
                 if (input) {
@@ -559,33 +635,29 @@
                     if (label) {
                         label.className = "text-[8px] text-slate-500 ss-no-wrap flex items-center";
                         const icon = label.querySelector('i');
-                        if (icon) {
-                            icon.setAttribute('data-lucide-width', '10');
-                            icon.setAttribute('data-lucide-height', '10');
-                            icon.style.cssText = "width:10px !important; height:10px !important; margin-right:4px !important;";
-                        }
+                        if (icon) icon.style.cssText = "width:10px !important; height:10px !important; margin-right:4px !important;";
                     }
                 }
             });
-            statusClone.querySelectorAll('p, #ocr-status-container, .hide-on-screenshot').forEach(el => el.remove());
+            statusClone.querySelectorAll('p, #ai-status-container, .hide-on-screenshot').forEach(el => el.remove());
             ssLeftCol.appendChild(statusClone);
+
             const resultClone = document.getElementById('ui-result').cloneNode(true);
-            resultClone.className = "bg-slate-900 border border-slate-800 rounded-sm p-2 shadow-md h-full";
-            resultClone.querySelector('h2').className = "text-[8px] font-bold text-cyan-600 flex items-center mb-1 ss-no-wrap";
+            resultClone.className = "bg-slate-900 border border-slate-800 rounded-sm p-2 h-full";
+            resultClone.querySelector('h2').className = "text-[8px] font-bold text-cyan-600 mb-1 ss-no-wrap";
             const p = state.calculatedPoints;
             resultClone.querySelector('#results-container').innerHTML = `
                 <div class="flex justify-between px-1 pb-1 text-[6px] font-bold text-slate-700 border-b border-slate-800/30 uppercase tracking-tighter ss-no-wrap"><span>Stat Name</span><span>Req.</span></div>
                 ${createResultRow('攻撃力', p.atk, 'atk', '', true)}${createResultRow('威圧', p.intimidation, 'intimidation', '', true)}${createResultRow('ダメージ倍率', p.dmgMul, 'dmgMul', '%', true)}${createResultRow('与ダメージ増加', p.dmgInc, 'dmgInc', '%', true)}${createResultRow('会心ダメージ', p.critDmg, 'critDmg', '%', true)}${createResultRow('対ボス与ダメ増', p.bossDmg, 'bossDmg', '%', true)}${createResultRow('状態異常与ダメ増', p.statusDmg, 'statusDmg', '%', true)}${createResultRow('対高HP与ダメ増', p.highHpDmg, 'highHpDmg', '%', true)}${createResultRow('対低HP与ダメ増', p.lowHpDmg, 'lowHpDmg', '%', true)}${createResultRow('防御無視', p.defIgn, 'defIgn', '', true)}
             `;
-            resultClone.querySelectorAll('i[data-lucide="info"]').forEach(el => el.parentNode.remove());
             ssRightCol.appendChild(resultClone);
-            const root = document.getElementById('screenshot-layout-root');
+
             setTimeout(() => {
-                html2canvas(root, { backgroundColor: '#020617', scale: 2, logging: false, useCORS: true, width: 450 }).then(canvas => {
+                html2canvas(document.getElementById('screenshot-layout-root'), { backgroundColor: '#020617', scale: 2, logging: false, useCORS: true, width: 450 }).then(canvas => {
                     document.body.style.cursor = 'default';
                     screenshotImage.src = canvas.toDataURL('image/png');
                     screenshotModal.classList.remove('hidden');
-                }).catch(err => {
+                }).catch(() => {
                     document.body.style.cursor = 'default';
                     alert('保存に失敗しました。');
                 });
