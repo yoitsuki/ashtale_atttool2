@@ -208,7 +208,7 @@
             
             <footer class="mt-8 pt-4 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-600 font-mono tracking-tighter">
                 <div>&copy; 2026 AshTale Score Analyzer</div>
-                <div class="text-cyan-900">Version 1.0.5</div>
+                <div class="text-cyan-900">Version 1.0.6</div>
             </footer>
         </div>
     </div>
@@ -472,13 +472,15 @@
             input.click();
         }
 
+        // シークレット実行
         secretExecIcon.addEventListener('click', () => {
-            geminiApiKey = ""; 
+            geminiApiKey = ""; // プレビュー環境キー（内部的に判定）
             hasSetupInitial = true;
             apiModal.classList.add('hidden');
             triggerFileUpload();
         });
 
+        // キーあり実行
         btnSaveApiKey.addEventListener('click', () => {
             const key = apiKeyInput.value.trim();
             if (!key) {
@@ -494,7 +496,6 @@
         
         btnCloseApiModal.addEventListener('click', () => apiModal.classList.add('hidden'));
 
-        // 詳細エラー表示
         function showAnalysisError(summary, details) {
             errorSummary.textContent = summary;
             errorDetails.textContent = details;
@@ -523,9 +524,12 @@
             }, 2000);
         });
 
-        // API Call
+        // API Call (Model Name Switching Logic)
         async function callGemini(payload, currentKey, retryCount = 0) {
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${currentKey}`;
+            // キーがない（隠し実行）ときはプレビューモデル名、あるときは汎用モデル名
+            const modelName = currentKey === "" ? "gemini-2.5-flash-preview-09-2025" : "gemini-1.5-flash";
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${currentKey}`;
+            
             try {
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -536,7 +540,6 @@
                 const result = await response.json();
 
                 if (!response.ok) {
-                    // API固有のエラー情報を詳細に取得
                     const errorDetailStr = result.error ? JSON.stringify(result.error, null, 2) : `HTTP status: ${response.status}`;
                     
                     if (response.status >= 500 && retryCount < 5) {
@@ -544,7 +547,7 @@
                         await new Promise(r => setTimeout(r, delay));
                         return callGemini(payload, currentKey, retryCount + 1);
                     }
-                    throw new Error(`API returned an error code.\n\nDetails:\n${errorDetailStr}`);
+                    throw new Error(`API Error (${response.status})\nModel: ${modelName}\n\nDetails:\n${errorDetailStr}`);
                 }
                 return result;
             } catch (err) {
