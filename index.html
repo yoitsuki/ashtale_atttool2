@@ -49,7 +49,6 @@
             white-space: nowrap !important;
         }
 
-        /* ローディングアニメーション */
         .loading-pulse {
             animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
@@ -124,10 +123,12 @@
                                 現在のステータス
                             </h2>
                             <div class="hide-on-screenshot flex items-center gap-2">
-                                <!-- OCR解析ボタン (アイコンのみ) -->
-                                <button id="btn-ocr" class="flex items-center justify-center w-[34px] h-[34px] bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-sm cursor-pointer transition-colors text-cyan-400" title="画像を解析して数値を読み込む">
-                                    <i data-lucide="scan" class="w-4 h-4 text-cyan-400"></i>
+                                <!-- OCR解析ボタン (隠しinputを連動) -->
+                                <input type="file" id="ocr-upload" accept="image/*" multiple class="hidden">
+                                <button id="btn-ocr" class="flex items-center justify-center w-[34px] h-[34px] bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-sm cursor-pointer transition-colors text-cyan-400" title="画像を読み込んで自動解析">
+                                    <i data-lucide="scan" class="w-4 h-4"></i>
                                 </button>
+                                
                                 <input type="file" id="image-upload" accept="image/*" multiple class="hidden">
                                 <label for="image-upload" class="flex items-center justify-center px-3 h-[34px] bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-sm text-[10px] font-bold cursor-pointer transition-colors text-slate-400">
                                     <i data-lucide="image-plus" class="w-3.5 h-3.5 mr-1.5 text-indigo-500"></i>画像を見ながら入力
@@ -135,10 +136,16 @@
                             </div>
                         </div>
 
-                        <!-- OCRプログレス -->
-                        <div id="ocr-status" class="hidden mb-3 p-2 bg-cyan-950/20 border border-cyan-900/50 rounded-sm text-[10px] text-cyan-400 font-mono loading-pulse">
-                            <i data-lucide="loader-2" class="w-3 h-3 mr-2 animate-spin inline"></i>
-                            <span id="ocr-status-text">画像を解析中...</span>
+                        <!-- OCRプログレス・ログ -->
+                        <div id="ocr-status-container" class="hidden mb-3 space-y-2">
+                            <div class="p-2 bg-cyan-950/20 border border-cyan-900/50 rounded-sm text-[10px] text-cyan-400 font-mono loading-pulse flex items-center">
+                                <i data-lucide="loader-2" class="w-3 h-3 mr-2 animate-spin"></i>
+                                <span id="ocr-status-text">解析中...</span>
+                            </div>
+                            <div class="p-2 bg-black/40 border border-slate-800 rounded-sm">
+                                <p class="text-[9px] text-slate-500 mb-1 uppercase font-bold tracking-tighter">OCR Raw Test Log:</p>
+                                <div id="ocr-debug-log" class="text-[9px] text-slate-400 font-mono h-20 overflow-y-auto custom-scrollbar break-all whitespace-pre-wrap leading-relaxed"></div>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-1">
@@ -203,7 +210,7 @@
             
             <footer class="mt-8 pt-4 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-600 font-mono tracking-tighter">
                 <div>&copy; 2026 AshTale Score Analyzer</div>
-                <div class="text-cyan-900">Version 0.1.25</div>
+                <div class="text-cyan-900">Version 0.1.26</div>
             </footer>
         </div>
     </div>
@@ -261,9 +268,14 @@
         const resultsContainer = document.getElementById('results-container');
         const timeDisplay = document.getElementById('time-display');
         const btnScreenshot = document.getElementById('btn-screenshot');
+        
+        // OCR UI elements
         const btnOcr = document.getElementById('btn-ocr');
-        const ocrStatus = document.getElementById('ocr-status');
+        const ocrUpload = document.getElementById('ocr-upload');
+        const ocrStatusContainer = document.getElementById('ocr-status-container');
         const ocrStatusText = document.getElementById('ocr-status-text');
+        const ocrDebugLog = document.getElementById('ocr-debug-log');
+
         const screenshotModal = document.getElementById('screenshot-modal');
         const screenshotImage = document.getElementById('screenshot-image');
         const btnCloseModal = document.getElementById('btn-close-modal');
@@ -272,6 +284,7 @@
         const mainReferenceImg = document.getElementById('main-reference-img');
         const imageThumbnails = document.getElementById('image-thumbnails');
         const btnClearImages = document.getElementById('btn-clear-images');
+        
         let loadedImages = [];
         let selectedImgIndex = 0;
 
@@ -350,6 +363,11 @@
                 ${createResultRow('防御無視', p.defIgn, 'defIgn')}
             `;
             lucide.createIcons();
+            
+            Object.keys(inputs).forEach(key => {
+                inputs[key].value = state.stats[key];
+            });
+
             state.calculatedPoints = p;
         }
 
@@ -365,22 +383,32 @@
             });
         });
 
-        fileInput.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
+        // 汎用画像読み込み
+        function handleImageFiles(files, andOCR = false) {
             if (files.length === 0) return;
             refImageSection.classList.remove('hidden');
-            files.forEach(file => {
+            let firstNewIdx = loadedImages.length;
+            
+            files.forEach((file, i) => {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     const dataUrl = event.target.result;
                     loadedImages.push(dataUrl);
                     renderThumbnails();
-                    if (loadedImages.length === 1) setMainImage(0);
+                    if (loadedImages.length === firstNewIdx + 1) {
+                        setMainImage(firstNewIdx);
+                        if (andOCR) runOCR(); // 複数読み込んでも、とりあえず表示された1枚目を解析
+                    }
                 };
                 reader.readAsDataURL(file);
             });
-            fileInput.value = '';
-        });
+        }
+
+        fileInput.addEventListener('change', (e) => handleImageFiles(Array.from(e.target.files)));
+        
+        // OCR専用の画像読み込み
+        btnOcr.addEventListener('click', () => ocrUpload.click());
+        ocrUpload.addEventListener('change', (e) => handleImageFiles(Array.from(e.target.files), true));
 
         function renderThumbnails() {
             imageThumbnails.innerHTML = '';
@@ -416,7 +444,7 @@
             imageThumbnails.innerHTML = '';
         });
 
-        // OCR解析ロジック
+        // OCR解析ロジック（強化版）
         async function preprocessImageForOCR(imgElement) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -427,7 +455,7 @@
             const data = imageData.data;
             for (let i = 0; i < data.length; i += 4) {
                 const avg = (data[i] + data[i+1] + data[i+2]) / 3;
-                const v = avg < 140 ? 0 : 255;
+                const v = avg < 140 ? 0 : 255; // 閾値で二値化
                 data[i] = data[i+1] = data[i+2] = v;
             }
             ctx.putImageData(imageData, 0, 0);
@@ -436,45 +464,60 @@
 
         async function runOCR() {
             if (!loadedImages.length) return;
-            ocrStatus.classList.remove('hidden');
+            ocrStatusContainer.classList.remove('hidden');
+            ocrDebugLog.textContent = "";
             ocrStatusText.textContent = "OCRエンジン準備中...";
+            
             try {
                 const processedData = await preprocessImageForOCR(mainReferenceImg);
                 const worker = await Tesseract.createWorker('jpn+eng');
-                ocrStatusText.textContent = "テキスト解析中...";
+                ocrStatusText.textContent = "テキストをスキャン中...";
                 const { data: { text } } = await worker.recognize(processedData);
                 await worker.terminate();
-                ocrStatusText.textContent = "データ抽出中...";
+
+                ocrDebugLog.textContent = text; // テストログの出力
+                ocrStatusText.textContent = "データを抽出中...";
+                
                 const lines = text.split('\n');
                 const newStats = { ...state.stats };
+                
                 lines.forEach(line => {
+                    // 数値の抽出（「,」や誤認しやすい「O」「l」を補正）
                     const cleanLine = line.replace(/,/g, '').replace(/[oOＯｏ]/g, '0').replace(/[lIｌＩ]/g, '1');
-                    const nums = cleanLine.match(/\d+(\.\d+)?/g);
-                    if (!nums) return;
-                    const val = nums[nums.length - 1];
-                    if (line.includes('攻撃')) newStats.atk = val;
-                    else if (line.includes('威圧')) newStats.intimidation = val;
-                    else if (line.includes('倍率')) newStats.dmgMul = val;
-                    else if (line.includes('与ダメージ')) newStats.dmgInc = val;
-                    else if (line.includes('会心')) newStats.critDmg = val;
-                    else if (line.includes('無視')) newStats.defIgn = val;
-                    else if (line.includes('対ボス')) newStats.bossDmg = val;
-                    else if (line.includes('状態異常')) newStats.statusDmg = val;
-                    else if (line.includes('対高HP')) newStats.highHpDmg = val;
-                    else if (line.includes('対低HP')) newStats.lowHpDmg = val;
+                    
+                    // ステータス名と数値のセットを探すロジック
+                    // 「攻撃力」の後に現れる数値、または数値のみの行を拾う
+                    const match = cleanLine.match(/(\d+\.?\d*)/g);
+                    if (!match) return;
+                    
+                    const lastVal = match[match.length - 1];
+                    // スクショ特有の「Req.」側の数値や小数点以下のノイズを除外するための簡易チェック
+                    if (parseFloat(lastVal) === 0 && !line.includes('0')) return;
+
+                    if (line.includes('攻撃')) newStats.atk = lastVal;
+                    else if (line.includes('威圧')) newStats.intimidation = lastVal;
+                    else if (line.includes('倍率')) newStats.dmgMul = lastVal;
+                    else if (line.includes('与ダメージ')) newStats.dmgInc = lastVal;
+                    else if (line.includes('会心')) newStats.critDmg = lastVal;
+                    else if (line.includes('無視')) newStats.defIgn = lastVal;
+                    else if (line.includes('対ボス')) newStats.bossDmg = lastVal;
+                    else if (line.includes('状態異常')) newStats.statusDmg = lastVal;
+                    else if (line.includes('対高HP')) newStats.highHpDmg = lastVal;
+                    else if (line.includes('対低HP')) newStats.lowHpDmg = lastVal;
                 });
-                Object.keys(newStats).forEach(key => { if (newStats[key]) state.stats[key] = newStats[key]; });
+
+                Object.assign(state.stats, newStats);
                 calculateAndRender();
-                ocrStatusText.textContent = "解析完了！";
-                setTimeout(() => ocrStatus.classList.add('hidden'), 3000);
+                ocrStatusText.textContent = "解析完了！ログを確認してください。";
+                setTimeout(() => ocrStatusContainer.classList.add('hidden'), 5000);
             } catch (err) {
                 console.error(err);
-                ocrStatusText.textContent = "解析に失敗しました。";
-                setTimeout(() => ocrStatus.classList.add('hidden'), 3000);
+                ocrStatusText.textContent = "解析エラーが発生しました。";
+                setTimeout(() => ocrStatusContainer.classList.add('hidden'), 3000);
             }
         }
-        btnOcr.addEventListener('click', runOCR);
 
+        // スクリーンショット
         btnScreenshot.addEventListener('click', async () => {
             document.body.style.cursor = 'wait';
             const ssLeftCol = document.getElementById('ss-left-col');
