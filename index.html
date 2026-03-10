@@ -130,6 +130,7 @@
                         <div id="image-thumbnails" class="mt-3 flex gap-2 overflow-x-auto custom-scrollbar pb-1" style="display: none;"></div>
                     </div>
 
+                    <!-- ステータス入力 -->
                     <div class="bg-slate-900 border border-slate-800 rounded-sm p-4 shadow-md relative" id="ui-status">
                         <div class="flex justify-between items-center mb-3 border-b border-slate-800 pb-2">
                             <h2 class="text-sm font-bold text-slate-300 flex items-center">
@@ -137,7 +138,7 @@
                                     <i data-lucide="target" class="w-4 h-4 text-blue-500 pointer-events-none"></i>
                                 </span>
                                 現在のステータス
-                                <button id="btn-gemini-trigger" class="hidden ml-3 p-1 rounded-sm bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/40 transition-all border border-indigo-500/30">
+                                <button id="btn-gemini-trigger" class="hidden ml-3 p-1 rounded-sm bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/40 transition-all border border-indigo-500/30" title="AIステータス解析">
                                     <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
                                 </button>
                             </h2>
@@ -157,65 +158,122 @@
                         <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-1">
                             <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
                                 <label class="flex items-center text-xs font-medium text-slate-400"><i data-lucide="sword" class="w-3.5 h-3.5 mr-2 text-cyan-600"></i><span>攻撃力</span></label>
-                                <input type="text" id="input-atk" class="w-28 sm:w-32 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                <div class="flex items-center gap-1">
+                                    <span id="rate-atk" class="hidden text-[9px] text-indigo-400 font-mono font-bold bg-indigo-950/50 px-1 rounded-sm border border-indigo-900/30"></span>
+                                    <input type="text" id="input-atk" class="w-20 sm:w-24 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                </div>
                             </div>
                             <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
                                 <label class="flex items-center text-xs font-medium text-slate-400"><i data-lucide="eye" class="w-3.5 h-3.5 mr-2 text-cyan-600"></i><span>威圧</span></label>
-                                <input type="text" id="input-intimidation" class="w-28 sm:w-32 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                <div class="flex items-center gap-1">
+                                    <span id="rate-intimidation" class="hidden text-[9px] text-indigo-400 font-mono font-bold bg-indigo-950/50 px-1 rounded-sm border border-indigo-900/30"></span>
+                                    <input type="text" id="input-intimidation" class="w-20 sm:w-24 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                </div>
                             </div>
                             <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
                                 <label class="flex items-center text-xs font-medium text-slate-400"><i data-lucide="zap" class="w-3.5 h-3.5 mr-2 text-cyan-600"></i><span>ダメージ倍率</span></label>
-                                <input type="text" id="input-dmgMul" class="w-28 sm:w-32 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                <div class="flex items-center gap-1">
+                                    <span id="rate-dmgMul" class="hidden text-[9px] text-indigo-400 font-mono font-bold bg-indigo-950/50 px-1 rounded-sm border border-indigo-900/30"></span>
+                                    <input type="text" id="input-dmgMul" class="w-20 sm:w-24 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                </div>
                             </div>
                             <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
                                 <label class="flex items-center text-xs font-medium text-slate-400"><i data-lucide="arrow-up-circle" class="w-3.5 h-3.5 mr-2 text-cyan-600"></i><span>与ダメージ増加</span></label>
-                                <input type="text" id="input-dmgInc" class="w-28 sm:w-32 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                <div class="flex items-center gap-1">
+                                    <span id="rate-dmgInc" class="hidden text-[9px] text-indigo-400 font-mono font-bold bg-indigo-950/50 px-1 rounded-sm border border-indigo-900/30"></span>
+                                    <input type="text" id="input-dmgInc" class="w-20 sm:w-24 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                </div>
                             </div>
                             <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
                                 <label class="flex items-center text-xs font-medium text-slate-400"><i data-lucide="crosshair" class="w-3.5 h-3.5 mr-2 text-cyan-600"></i><span>会心ダメージ</span></label>
-                                <input type="text" id="input-critDmg" class="w-28 sm:w-32 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                <div class="flex items-center gap-1">
+                                    <span id="rate-critDmg" class="hidden text-[9px] text-indigo-400 font-mono font-bold bg-indigo-950/50 px-1 rounded-sm border border-indigo-900/30"></span>
+                                    <input type="text" id="input-critDmg" class="w-20 sm:w-24 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                </div>
                             </div>
                             <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
                                 <label class="flex items-center text-xs font-medium text-slate-400"><i data-lucide="shield-alert" class="w-3.5 h-3.5 mr-2 text-cyan-600"></i><span>防御無視</span></label>
-                                <input type="text" id="input-defIgn" class="w-28 sm:w-32 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                <div class="flex items-center gap-1">
+                                    <span id="rate-defIgn" class="hidden text-[9px] text-indigo-400 font-mono font-bold bg-indigo-950/50 px-1 rounded-sm border border-indigo-900/30"></span>
+                                    <input type="text" id="input-defIgn" class="w-20 sm:w-24 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                </div>
                             </div>
                             <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
                                 <label class="flex items-center text-xs font-medium text-slate-400"><i data-lucide="skull" class="w-3.5 h-3.5 mr-2 text-cyan-600"></i><span>対ボス与ダメ増</span></label>
-                                <input type="text" id="input-bossDmg" class="w-28 sm:w-32 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                <div class="flex items-center gap-1">
+                                    <span id="rate-bossDmg" class="hidden text-[9px] text-indigo-400 font-mono font-bold bg-indigo-950/50 px-1 rounded-sm border border-indigo-900/30"></span>
+                                    <input type="text" id="input-bossDmg" class="w-20 sm:w-24 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                </div>
                             </div>
                             <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
                                 <label class="flex items-center text-xs font-medium text-slate-400"><i data-lucide="zap" class="w-3.5 h-3.5 mr-2 text-cyan-700"></i><span>状態異常与ダメ増</span></label>
-                                <input type="text" id="input-statusDmg" class="w-28 sm:w-32 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                <div class="flex items-center gap-1">
+                                    <span id="rate-statusDmg" class="hidden text-[9px] text-indigo-400 font-mono font-bold bg-indigo-950/50 px-1 rounded-sm border border-indigo-900/30"></span>
+                                    <input type="text" id="input-statusDmg" class="w-20 sm:w-24 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                </div>
                             </div>
                             <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
                                 <label class="flex items-center text-xs font-medium text-slate-400"><i data-lucide="target" class="w-3.5 h-3.5 mr-2 text-cyan-700"></i><span>対高HP与ダメ増</span></label>
-                                <input type="text" id="input-highHpDmg" class="w-28 sm:w-32 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                <div class="flex items-center gap-1">
+                                    <span id="rate-highHpDmg" class="hidden text-[9px] text-indigo-400 font-mono font-bold bg-indigo-950/50 px-1 rounded-sm border border-indigo-900/30"></span>
+                                    <input type="text" id="input-highHpDmg" class="w-20 sm:w-24 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                </div>
                             </div>
                             <div class="flex justify-between items-center py-1.5 px-1 border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
                                 <label class="flex items-center text-xs font-medium text-slate-400"><i data-lucide="target" class="w-3.5 h-3.5 mr-2 text-cyan-700"></i><span>対低HP与ダメ増</span></label>
-                                <input type="text" id="input-lowHpDmg" class="w-28 sm:w-32 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                <div class="flex items-center gap-1">
+                                    <span id="rate-lowHpDmg" class="hidden text-[9px] text-indigo-400 font-mono font-bold bg-indigo-950/50 px-1 rounded-sm border border-indigo-900/30"></span>
+                                    <input type="text" id="input-lowHpDmg" class="w-20 sm:w-24 bg-slate-950 border border-slate-800 text-slate-100 text-right text-xs rounded-sm px-2 py-1 focus:outline-none focus:border-cyan-600 transition-all font-mono" />
+                                </div>
                             </div>
+                        </div>
+
+                        <!-- AI生データ確認エリア -->
+                        <div id="ai-raw-response-container" class="hidden mt-4 p-3 bg-black/50 border border-slate-800 rounded-sm hide-on-screenshot">
+                            <div class="flex justify-between items-center mb-2">
+                                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-tighter flex items-center">
+                                    <i data-lucide="file-json" class="w-3.5 h-3.5 mr-1.5 text-indigo-500"></i> AI Raw Response
+                                </p>
+                                <button id="btn-close-raw" class="text-slate-600 hover:text-slate-300 transition-colors"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                            <div id="ai-raw-response-text" class="text-[10px] text-slate-300 font-mono whitespace-pre-wrap break-all h-32 overflow-y-auto custom-scrollbar p-2 bg-slate-950 border border-slate-800 rounded-sm"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 右カラム -->
                 <div class="lg:col-span-7 flex flex-col gap-4 h-full">
+                    
+                    <!-- 評価表 (隠し機能) -->
+                    <div id="ui-evaluation" class="hidden bg-slate-900 border border-slate-800 rounded-sm p-4 md:p-5 shadow-md">
+                        <div class="mb-4 flex items-center justify-between border-b border-slate-800 pb-2">
+                            <div class="flex items-center">
+                                <i data-lucide="bar-chart-2" class="w-4 h-4 mr-2 text-indigo-400"></i>
+                                <h2 class="text-sm font-bold text-slate-300">ステータス・バランス評価</h2>
+                            </div>
+                        </div>
+                        <div id="eval-results-container" class="space-y-0 w-full"></div>
+                    </div>
+
+                    <!-- 火力1%UP -->
                     <div class="bg-slate-900 border border-slate-800 rounded-sm p-4 md:p-5 shadow-md flex-1" id="ui-result">
                         <div class="mb-4 flex items-center justify-between border-b border-slate-800 pb-2">
                             <div class="flex items-center">
-                                <i data-lucide="arrow-up-circle" class="w-4 h-4 mr-2 text-cyan-500"></i>
+                                <span id="eval-trigger-icon" class="cursor-pointer active:scale-90 transition-transform block">
+                                    <i data-lucide="arrow-up-circle" class="w-4 h-4 mr-2 text-cyan-500 pointer-events-none"></i>
+                                </span>
                                 <h2 class="text-sm font-bold text-slate-300">火力1%UPに必要なステータス</h2>
                             </div>
                         </div>
-                        <div id="results-container" class="space-y-0"></div>
+                        <div id="results-container" class="space-y-0 w-full"></div>
                     </div>
                 </div>
+
             </div>
             
             <footer class="mt-8 pt-4 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-600 font-mono tracking-tighter">
                 <div>&copy; 2026 AshTale Score Analyzer</div>
-                <div class="text-cyan-900">Version 1.0.13</div>
+                <div class="text-cyan-900">Version 1.0.20</div>
             </footer>
         </div>
     </div>
@@ -229,10 +287,6 @@
                 </span>
                 <h3 class="text-sm font-bold uppercase tracking-widest">AI Status Parser</h3>
             </div>
-            <p class="text-[10px] text-slate-400 mb-5 leading-relaxed">
-                Google Gemini AIを使用して画像から数値を抽出します。<br>
-                ステータス項目を自動で入力欄に反映させることが可能です。
-            </p>
             <div class="space-y-4">
                 <div class="relative group">
                     <input type="text" id="gemini-api-key-input" autocomplete="off" placeholder="APIキーを入力してください" class="w-full bg-slate-950 border border-slate-800 rounded-sm pl-3 pr-10 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-700 font-mono placeholder-slate-700 transition-colors" />
@@ -275,11 +329,11 @@
         </div>
     </div>
 
-    <!-- スクショ用レイアウト -->
+    <!-- スクショ用一時レイアウト -->
     <div id="screenshot-temp-wrapper" style="position: absolute; left: -9999px; top: -9999px; background-color: #020617;">
         <div id="screenshot-layout-root" class="bg-slate-950 text-slate-200 p-5 flex items-end gap-3" style="width: 450px;">
-            <div id="ss-left-col" class="flex-1 flex flex-col gap-3"></div>
-            <div id="ss-right-col" class="flex-1"></div>
+            <div id="ss-left-col" class="flex-1 flex flex-col gap-3 w-full"></div>
+            <div id="ss-right-col" class="flex-1 flex flex-col gap-3 w-full"></div>
         </div>
     </div>
 
@@ -305,6 +359,7 @@
 
         let geminiApiKey = ""; 
         let hasSetupInitial = false;
+        let isAdvancedMode = false; 
 
         const state = {
             stats: {
@@ -331,6 +386,7 @@
         const timeDisplay = document.getElementById('time-display');
         const btnScreenshot = document.getElementById('btn-screenshot');
         
+        // AI OCR
         const statusIcon = document.getElementById('ui-status-icon');
         const btnGeminiTrigger = document.getElementById('btn-gemini-trigger');
         const apiModal = document.getElementById('api-modal');
@@ -343,7 +399,14 @@
         const aiStatusContainer = document.getElementById('ai-status-container');
         const aiStatusText = document.getElementById('ai-status-text');
 
-        // Error UI
+        const aiRawResponseContainer = document.getElementById('ai-raw-response-container');
+        const aiRawResponseText = document.getElementById('ai-raw-response-text');
+        const btnCloseRaw = document.getElementById('btn-close-raw');
+
+        const evalTriggerIcon = document.getElementById('eval-trigger-icon');
+        const uiEvaluation = document.getElementById('ui-evaluation');
+        const evalResultsContainer = document.getElementById('eval-results-container');
+
         const errorModal = document.getElementById('error-modal');
         const errorDetails = document.getElementById('error-details');
         const errorSummary = document.getElementById('error-message-summary');
@@ -379,25 +442,11 @@
         }
         document.getElementById('input-memo-header').addEventListener('input', adjustMemoHeight);
 
-        function createResultRow(label, value, key, unit = '', isScreenshot = false) {
-            const displayUnit = (value !== '---' && value !== 0) ? unit : '';
-            let infoBtnHtml = '';
-            if (!isScreenshot) {
-                if (key === 'highHpDmg' || key === 'lowHpDmg') {
-                    infoBtnHtml = `<div class="relative group ml-1.5 inline-block"><i data-lucide="info" class="w-3 h-3 text-slate-600 cursor-help"></i><div class="absolute left-0 bottom-full mb-2 hidden group-hover:block z-50 w-48 p-2 bg-slate-800 text-[10px] text-slate-200 rounded shadow-lg border border-slate-700 info-popup">稼働率を50%と仮定。</div></div>`;
-                } else if (key === 'defIgn') {
-                    infoBtnHtml = `<div class="relative group ml-1.5 inline-block"><i data-lucide="info" class="w-3 h-3 text-slate-600 cursor-help"></i><div class="absolute left-0 bottom-full mb-2 hidden group-hover:block z-50 w-48 p-2 bg-slate-800 text-[10px] text-slate-200 rounded shadow-lg border border-slate-700 info-popup">計算対象外。</div></div>`;
-                }
-            }
-            const rowClass = isScreenshot ? "flex justify-between items-center py-1 px-1 border-b border-slate-800/40" : "flex justify-between items-center py-2 px-2 border-b border-slate-800/40 hover:bg-slate-800/10 transition-colors";
-            const labelClass = isScreenshot ? "text-[8px] text-slate-400 ss-no-wrap" : "text-xs text-slate-400";
-            const valClass = isScreenshot ? "text-[9px] font-mono font-bold text-slate-100" : "text-sm font-mono font-bold text-slate-100";
-            return `<div class="${rowClass}"><div class="flex items-center"><span class="${labelClass}">${label}</span>${infoBtnHtml}</div><div class="flex items-center"><span class="${valClass}">${value}${displayUnit}</span></div></div>`;
-        }
-
-        function calculateAndRender() {
+        // UI生成用関数（画面表示用）
+        function generateResultHtml(isScreenshot = false) {
             const v = {
                 atk: parseFloat(state.stats.atk) || 0,
+                intimidation: parseFloat(state.stats.intimidation) || 0,
                 dmgMul: parseFloat(state.stats.dmgMul) || 0,
                 dmgInc: parseFloat(state.stats.dmgInc) || 0,
                 critDmg: parseFloat(state.stats.critDmg) || 0,
@@ -405,7 +454,6 @@
                 statusDmg: parseFloat(state.stats.statusDmg) || 0,
                 highHpDmg: parseFloat(state.stats.highHpDmg) || 0,
                 lowHpDmg: parseFloat(state.stats.lowHpDmg) || 0,
-                intimidation: parseFloat(state.stats.intimidation) || 0,
             };
             const shlSum = v.statusDmg + v.highHpDmg + v.lowHpDmg;
             const isAnyInput = Object.values(state.stats).some(val => val !== '');
@@ -421,25 +469,224 @@
                 lowHpDmg: shlSum * 0.02,  
                 defIgn: '---'
             };
+            
             Object.keys(p).forEach(key => {
                 if (typeof p[key] === 'number') p[key] = p[key] > 0 ? p[key].toFixed(2) : 0;
             });
-            resultsContainer.innerHTML = `
-                <div class="flex justify-between px-2 pb-1 text-[10px] font-bold text-slate-600 border-b border-slate-800/30 uppercase tracking-tighter"><span>Stat Name</span><span>Required Amount</span></div>
-                ${createResultRow('攻撃力', p.atk, 'atk')}
-                ${createResultRow('威圧', p.intimidation, 'intimidation')}
-                ${createResultRow('ダメージ倍率', p.dmgMul, 'dmgMul', '%')}
-                ${createResultRow('与ダメージ増加', p.dmgInc, 'dmgInc', '%')}
-                ${createResultRow('会心ダメージ', p.critDmg, 'critDmg', '%')}
-                ${createResultRow('対ボス与ダメ増', p.bossDmg, 'bossDmg', '%')}
-                ${createResultRow('状態異常与ダメ増', p.statusDmg, 'statusDmg', '%')}
-                ${createResultRow('対高HP与ダメ増', p.highHpDmg, 'highHpDmg', '%')}
-                ${createResultRow('対低HP与ダメ増', p.lowHpDmg, 'lowHpDmg', '%')}
-                ${createResultRow('防御無視', p.defIgn, 'defIgn')}
+
+            const headerClass = isScreenshot 
+                ? "flex justify-between px-1 pb-1 border-b border-slate-800/30 uppercase tracking-tighter ss-no-wrap"
+                : "flex justify-between px-2 pb-1 text-[10px] font-bold text-slate-600 border-b border-slate-800/30 uppercase tracking-tighter";
+            
+            const headerSpans = isScreenshot
+                ? `<span class="font-bold text-slate-500" style="font-size: 7px !important;">Stat Name</span><span class="font-bold text-slate-500" style="font-size: 7px !important;">Req.</span>`
+                : `<span>Stat Name</span><span>Required Amount</span>`;
+
+            function row(label, value, key, unit) {
+                const displayUnit = (value !== '---' && value !== 0) ? unit : '';
+                let infoBtnHtml = '';
+                if (!isScreenshot) {
+                    if (key === 'highHpDmg' || key === 'lowHpDmg') {
+                        infoBtnHtml = `<div class="relative group ml-1.5 inline-flex items-center"><i data-lucide="info" class="w-3 h-3 text-slate-600 cursor-help"></i><div class="absolute left-0 bottom-full mb-2 hidden group-hover:block z-50 w-48 p-2 bg-slate-800 text-[10px] text-slate-200 rounded shadow-xl border border-slate-700 info-popup leading-relaxed whitespace-normal break-words">稼働率を50%と仮定し計算しています。</div></div>`;
+                    } else if (key === 'defIgn') {
+                        infoBtnHtml = `<div class="relative group ml-1.5 inline-flex items-center"><i data-lucide="info" class="w-3 h-3 text-slate-600 cursor-help"></i><div class="absolute left-0 bottom-full mb-2 hidden group-hover:block z-50 w-48 p-2 bg-slate-800 text-[10px] text-slate-200 rounded shadow-xl border border-slate-700 info-popup leading-relaxed whitespace-normal break-words">敵防御力等に依存するため計算対象外です。</div></div>`;
+                    }
+                }
+                const rClass = isScreenshot ? "flex justify-between items-center py-1 px-1 border-b border-slate-800/40" : "flex justify-between items-center py-2 px-2 border-b border-slate-800/40 hover:bg-slate-800/10 transition-colors";
+                const lClass = isScreenshot ? "text-slate-400 ss-no-wrap flex items-center" : "text-xs text-slate-400 flex items-center";
+                const lStyle = isScreenshot ? "font-size: 8px !important;" : "";
+                const vClass = isScreenshot ? "font-mono text-slate-100" : "text-sm font-mono font-bold text-slate-100";
+                const vStyle = isScreenshot ? "font-size: 8px !important;" : "";
+                
+                return `<div class="${rClass}">
+                    <div class="${lClass}" style="${lStyle}"><span>${label}</span>${infoBtnHtml}</div>
+                    <div class="flex items-center"><span class="${vClass}" style="${vStyle}">${value}${displayUnit}</span></div>
+                </div>`;
+            }
+
+            return `<div class="${headerClass}">${headerSpans}</div>
+                ${row('攻撃力', p.atk, 'atk', '')}
+                ${row('威圧', p.intimidation, 'intimidation', '')}
+                ${row('ダメージ倍率', p.dmgMul, 'dmgMul', '%')}
+                ${row('与ダメージ増加', p.dmgInc, 'dmgInc', '%')}
+                ${row('会心ダメージ', p.critDmg, 'critDmg', '%')}
+                ${row('対ボス与ダメ増', p.bossDmg, 'bossDmg', '%')}
+                ${row('状態異常与ダメ増', p.statusDmg, 'statusDmg', '%')}
+                ${row('対高HP与ダメ増', p.highHpDmg, 'highHpDmg', '%')}
+                ${row('対低HP与ダメ増', p.lowHpDmg, 'lowHpDmg', '%')}
+                ${row('防御無視', p.defIgn, 'defIgn', '')}
             `;
+        }
+
+        function generateEvalHtml(isScreenshot = false) {
+            const v = {
+                atk: parseFloat(state.stats.atk) || 0,
+                intimidation: parseFloat(state.stats.intimidation) || 0,
+                dmgMul: parseFloat(state.stats.dmgMul) || 0,
+                dmgInc: parseFloat(state.stats.dmgInc) || 0,
+                critDmg: parseFloat(state.stats.critDmg) || 0,
+                bossDmg: parseFloat(state.stats.bossDmg) || 0,
+                statusDmg: parseFloat(state.stats.statusDmg) || 0,
+                highHpDmg: parseFloat(state.stats.highHpDmg) || 0,
+                lowHpDmg: parseFloat(state.stats.lowHpDmg) || 0,
+            };
+            const shlSum = v.statusDmg + v.highHpDmg + v.lowHpDmg;
+            const isAnyInput = Object.values(state.stats).some(val => val !== '');
+            const p = {
+                atk: v.atk * 0.01,
+                intimidation: isAnyInput ? (10 + (v.intimidation * 0.01)) : 0,
+                dmgMul: v.dmgMul, 
+                dmgInc: v.dmgInc * 0.01,
+                critDmg: v.critDmg * 0.01,
+                bossDmg: v.bossDmg * 0.01,
+                statusDmg: shlSum * 0.01,
+                highHpDmg: shlSum * 0.02, 
+                lowHpDmg: shlSum * 0.02,  
+            };
+            const rates = {
+                atk: p.atk / (v.atk || Infinity) * 100,
+                intimidation: p.intimidation / (v.intimidation || Infinity) * 100,
+                dmgMul: p.dmgMul / (v.dmgMul || Infinity) * 100,
+                dmgInc: p.dmgInc / (v.dmgInc || Infinity) * 100,
+                critDmg: p.critDmg / (v.critDmg || Infinity) * 100,
+                bossDmg: p.bossDmg / (v.bossDmg || Infinity) * 100,
+                statusDmg: p.statusDmg / (v.statusDmg || Infinity) * 100,
+                highHpDmg: p.highHpDmg / (v.highHpDmg || Infinity) * 100,
+                lowHpDmg: p.lowHpDmg / (v.lowHpDmg || Infinity) * 100,
+            };
+
+            const atkTarget = v.dmgMul * 20000;
+            const atkEval = v.atk === 0 ? "-" : (v.atk >= atkTarget ? "〇" : "△");
+            
+            const dmgIncTarget = 170.0;
+            const dmgIncEval = v.dmgInc === 0 ? "-" : (v.dmgInc >= dmgIncTarget ? "〇" : "△");
+            
+            const critTarget = v.dmgMul * 60;
+            const critEval = v.critDmg === 0 ? "-" : (v.critDmg >= critTarget ? "〇" : "△");
+            
+            const statusTarget = v.critDmg * (230 / 730);
+            const statusEval = v.statusDmg === 0 ? "-" : (v.statusDmg >= statusTarget ? "〇" : "△");
+            
+            const intEff = rates.intimidation === Infinity ? "-" : (rates.intimidation <= 4 ? "〇" : "△");
+            const statEff = rates.statusDmg === Infinity ? "-" : (rates.statusDmg <= 4 ? "〇" : "△");
+            const highEff = rates.highHpDmg === Infinity ? "-" : (rates.highHpDmg <= 4 ? "〇" : "△");
+            const lowEff = rates.lowHpDmg === Infinity ? "-" : (rates.lowHpDmg <= 4 ? "〇" : "△");
+
+            const headerClass = isScreenshot 
+                ? "flex justify-between px-1 pb-1 border-b border-slate-800/30 uppercase tracking-tighter ss-no-wrap"
+                : "flex justify-between px-2 pb-1 text-[9px] font-bold text-slate-500 border-b border-slate-800/30 uppercase tracking-tighter";
+            
+            const headerSpans = isScreenshot
+                ? `<span class="font-bold text-slate-500" style="font-size: 7px !important;">Metric</span><span class="font-bold text-slate-500" style="font-size: 7px !important;">Target / Status</span>`
+                : `<span>Metric</span><span>Target / Status</span>`;
+
+            function row(label, evalMark, targetValue, tooltipText) {
+                const rClass = isScreenshot ? "flex justify-between items-center py-1 px-1 border-b border-slate-800/40" : "flex justify-between items-center py-1.5 px-2 border-b border-slate-800/40 hover:bg-slate-800/10 transition-colors";
+                const lClass = isScreenshot ? "text-slate-400 ss-no-wrap flex items-center" : "text-xs text-slate-400 flex items-center";
+                const lStyle = isScreenshot ? "font-size: 8px !important;" : "";
+                const vClass = isScreenshot ? "font-mono text-slate-300" : "text-[11px] font-mono text-slate-300";
+                const vStyle = isScreenshot ? "font-size: 8px !important;" : "";
+                
+                let markColor = "text-slate-500";
+                if (evalMark === "〇") markColor = "text-green-400 font-bold";
+                else if (evalMark === "△") markColor = "text-yellow-400 font-bold";
+                const markClass = isScreenshot ? markColor : `text-sm ${markColor}`;
+                const mStyle = isScreenshot ? "font-size: 9px !important;" : "";
+
+                let infoIcon = '';
+                if (!isScreenshot && tooltipText) {
+                    infoIcon = `<div class="relative group ml-1.5 inline-flex items-center">
+                        <i data-lucide="info" class="w-3 h-3 text-slate-600 cursor-help"></i>
+                        <div class="absolute left-0 bottom-full mb-2 hidden group-hover:block z-50 w-48 p-2 bg-slate-800 text-[10px] text-slate-200 rounded shadow-xl border border-slate-700 info-popup leading-relaxed whitespace-normal break-words">
+                            ${tooltipText}
+                        </div>
+                    </div>`;
+                }
+
+                return `<div class="${rClass}">
+                    <div class="${lClass}" style="${lStyle}"><span>${label}</span>${infoIcon}</div>
+                    <div class="flex items-center gap-3">
+                        <span class="${vClass}" style="${vStyle}">${targetValue}</span>
+                        <span class="${markClass}" style="${mStyle}">${evalMark}</span>
+                    </div>
+                </div>`;
+            }
+
+            return `<div class="${headerClass}">${headerSpans}</div>
+                ${row('攻撃力', atkEval, `目標: ${atkTarget.toFixed(0)}`, 'ダメージ倍率の約2万倍以上で〇')}
+                ${row('与ダメージ増加', dmgIncEval, `目標: ${dmgIncTarget.toFixed(2)}%`, '目安として約170%以上で〇')}
+                ${row('会心ダメージ', critEval, `目標: ${critTarget.toFixed(2)}%`, 'ダメージ倍率×60が目安')}
+                ${row('異常ダメ(バランス)', statusEval, `目標: ${statusTarget.toFixed(2)}%`, '会心ダメ730%の時、異常ダメ230%がバランスの目安')}
+                ${row('威圧 効率', intEff, rates.intimidation !== Infinity ? `上昇率: ${rates.intimidation.toFixed(2)}%` : '-', '火力1%UPに必要なステータス上昇率。4%超えはステータスが低すぎると判定')}
+                ${row('異常ダメ 効率', statEff, rates.statusDmg !== Infinity ? `上昇率: ${rates.statusDmg.toFixed(2)}%` : '-', '火力1%UPに必要なステータス上昇率。4%超えはステータスが低すぎると判定')}
+                ${row('高HPダメ 効率', highEff, rates.highHpDmg !== Infinity ? `上昇率: ${rates.highHpDmg.toFixed(2)}%` : '-', '火力1%UPに必要なステータス上昇率。4%超えはステータスが低すぎると判定')}
+                ${row('低HPダメ 効率', lowEff, rates.lowHpDmg !== Infinity ? `上昇率: ${rates.lowHpDmg.toFixed(2)}%` : '-', '火力1%UPに必要なステータス上昇率。4%超えはステータスが低すぎると判定')}
+            `;
+        }
+
+        function calculateAndRender() {
+            const v = {
+                atk: parseFloat(state.stats.atk) || 0,
+                intimidation: parseFloat(state.stats.intimidation) || 0,
+                dmgMul: parseFloat(state.stats.dmgMul) || 0,
+                dmgInc: parseFloat(state.stats.dmgInc) || 0,
+                critDmg: parseFloat(state.stats.critDmg) || 0,
+                bossDmg: parseFloat(state.stats.bossDmg) || 0,
+                statusDmg: parseFloat(state.stats.statusDmg) || 0,
+                highHpDmg: parseFloat(state.stats.highHpDmg) || 0,
+                lowHpDmg: parseFloat(state.stats.lowHpDmg) || 0,
+            };
+            const shlSum = v.statusDmg + v.highHpDmg + v.lowHpDmg;
+            const isAnyInput = Object.values(state.stats).some(val => val !== '');
+            const p = {
+                atk: v.atk * 0.01,
+                intimidation: isAnyInput ? (10 + (v.intimidation * 0.01)) : 0,
+                dmgMul: v.dmgMul, 
+                dmgInc: v.dmgInc * 0.01,
+                critDmg: v.critDmg * 0.01,
+                bossDmg: v.bossDmg * 0.01,
+                statusDmg: shlSum * 0.01,
+                highHpDmg: shlSum * 0.02, 
+                lowHpDmg: shlSum * 0.02,  
+            };
+            
+            const rates = {
+                atk: p.atk / (v.atk || Infinity) * 100,
+                intimidation: p.intimidation / (v.intimidation || Infinity) * 100,
+                dmgMul: p.dmgMul / (v.dmgMul || Infinity) * 100,
+                dmgInc: p.dmgInc / (v.dmgInc || Infinity) * 100,
+                critDmg: p.critDmg / (v.critDmg || Infinity) * 100,
+                bossDmg: p.bossDmg / (v.bossDmg || Infinity) * 100,
+                statusDmg: p.statusDmg / (v.statusDmg || Infinity) * 100,
+                highHpDmg: p.highHpDmg / (v.highHpDmg || Infinity) * 100,
+                lowHpDmg: p.lowHpDmg / (v.lowHpDmg || Infinity) * 100,
+            };
+
+            // Update Rates Badges
+            Object.keys(rates).forEach(key => {
+                const el = document.getElementById(`rate-${key}`);
+                if (el) {
+                    if (isAdvancedMode && rates[key] > 0 && rates[key] !== Infinity) {
+                        el.textContent = `+${rates[key].toFixed(2)}%`;
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                }
+            });
+
+            // Update Evaluation Table
+            if (isAdvancedMode) {
+                uiEvaluation.classList.remove('hidden');
+                evalResultsContainer.innerHTML = generateEvalHtml(false);
+            } else {
+                uiEvaluation.classList.add('hidden');
+            }
+
+            // Update Results Table
+            resultsContainer.innerHTML = generateResultHtml(false);
             lucide.createIcons();
             Object.keys(inputs).forEach(key => { inputs[key].value = state.stats[key]; });
-            state.calculatedPoints = p;
         }
 
         Object.keys(inputs).forEach(key => {
@@ -454,7 +701,7 @@
             });
         });
 
-        // 隠しボタンのトリガー (ダブルクリック)
+        // 隠しボタンのトリガー
         let iconClickCount = 0;
         let iconClickTimer;
         statusIcon.addEventListener('click', () => {
@@ -466,6 +713,20 @@
                 iconClickCount = 0;
             } else {
                 iconClickTimer = setTimeout(() => { iconClickCount = 0; }, 300);
+            }
+        });
+
+        let evalClickCount = 0;
+        let evalClickTimer;
+        evalTriggerIcon.addEventListener('click', () => {
+            evalClickCount++;
+            clearTimeout(evalClickTimer);
+            if (evalClickCount >= 2) {
+                isAdvancedMode = !isAdvancedMode;
+                calculateAndRender();
+                evalClickCount = 0;
+            } else {
+                evalClickTimer = setTimeout(() => { evalClickCount = 0; }, 300);
             }
         });
 
@@ -483,7 +744,6 @@
             input.click();
         }
 
-        // キーの表示切替
         btnToggleKeyVisibility.addEventListener('click', () => {
             const isText = apiKeyInput.type === 'text';
             apiKeyInput.type = isText ? 'password' : 'text';
@@ -491,15 +751,13 @@
             lucide.createIcons();
         });
 
-        // シークレット実行 (アイコンクリック)
         secretExecIcon.addEventListener('click', () => {
-            geminiApiKey = ""; // 空文字でプレビュー環境モデルを指定
+            geminiApiKey = ""; 
             hasSetupInitial = true;
             apiModal.classList.add('hidden');
             triggerFileUpload();
         });
 
-        // 実行するボタン（バリデーションあり）
         btnSaveApiKey.addEventListener('click', () => {
             const key = apiKeyInput.value.trim();
             if (!key) {
@@ -514,6 +772,7 @@
         });
         
         btnCloseApiModal.addEventListener('click', () => apiModal.classList.add('hidden'));
+        btnCloseRaw.addEventListener('click', () => aiRawResponseContainer.classList.add('hidden'));
 
         function showAnalysisError(summary, details) {
             errorSummary.textContent = summary;
@@ -535,11 +794,18 @@
             setTimeout(() => { btnCopyError.textContent = "エラー内容をコピー"; }, 2000);
         });
 
+        function showRawResponse(text) {
+            aiRawResponseText.textContent = text;
+            aiRawResponseContainer.classList.remove('hidden');
+        }
+
         // API Call Logic
         async function callGemini(payload, currentKey, retryCount = 0) {
-            // キーがないときはプレビューモデル、あるときはユーザーの2.5-flashを使用
-            const modelName = currentKey === "" ? "gemini-2.5-flash-preview-09-2025" : "gemini-2.5-flash";
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${currentKey}`;
+            // 元々動いていた「変数に代入してからfetchに渡す」形に完全に戻します。
+            // これによりCanvas環境のキー自動注入システムが正しく働きます。
+            const endpoint = currentKey === "" 
+                ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${currentKey}`
+                : `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${currentKey}`;
             
             try {
                 const response = await fetch(endpoint, {
@@ -552,15 +818,12 @@
 
                 if (!response.ok) {
                     const errorDetailStr = result.error ? JSON.stringify(result.error, null, 2) : `HTTP status: ${response.status}`;
-                    if (response.status === 429) {
-                        throw new Error(`API制限にかかりました。少し時間（1分程度）を空けてから再度お試しください。\nModel: ${modelName}\n\nDetails:\n${errorDetailStr}`);
-                    }
                     if (response.status >= 500 && retryCount < 5) {
                         const delay = Math.pow(2, retryCount) * 1000;
                         await new Promise(r => setTimeout(r, delay));
                         return callGemini(payload, currentKey, retryCount + 1);
                     }
-                    throw new Error(`API Error Code: ${response.status}\nModel used: ${modelName}\n\nDetails:\n${errorDetailStr}`);
+                    throw new Error(`API Error Code: ${response.status}\n\nDetails:\n${errorDetailStr}`);
                 }
                 return result;
             } catch (err) {
@@ -577,6 +840,9 @@
             if (!files.length) return;
             aiStatusContainer.classList.remove('hidden');
             aiStatusText.textContent = "AI解析を準備中...";
+            aiRawResponseContainer.classList.add('hidden');
+            
+            let rawText = "";
 
             try {
                 const imageParts = await Promise.all(files.map(async file => {
@@ -590,8 +856,20 @@
                 }));
 
                 const systemPrompt = `AshTale(アッシュテイル)のステータス画面を解析してください。
-以下のJSON形式で数値を抽出してください（%記号は不要、抽出不可はnull）。
-{"atk":数, "intimidation":数, "dmgMul":数, "dmgInc":数, "critDmg":数, "defIgn":数, "bossDmg":数, "statusDmg":数, "highHpDmg":数, "lowHpDmg":数}`;
+必ず以下のJSON形式の文字列のみを出力してください（Markdownの修飾や挨拶は不要です）。%記号やカンマは除外し数値のみを記載してください。
+項目が見つからない場合は null または "0" を指定してください。
+{
+  "atk": 数値,
+  "intimidation": 数値,
+  "dmgMul": 数値,
+  "dmgInc": 数値,
+  "critDmg": 数値,
+  "defIgn": 数値,
+  "bossDmg": 数値,
+  "statusDmg": 数値,
+  "highHpDmg": 数値,
+  "lowHpDmg": 数値
+}`;
 
                 const payload = {
                     contents: [{ parts: [{ text: "画像から数値を抽出してください。" }, ...imageParts] }],
@@ -600,12 +878,45 @@
                 };
 
                 const result = await callGemini(payload, geminiApiKey);
-                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!text) throw new Error("解析データが取得できませんでした。");
+                
+                rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (!rawText) {
+                    rawText = JSON.stringify(result, null, 2);
+                    throw new Error("解析データが取得できませんでした。\nAPIレスポンスを参照してください。");
+                }
 
-                const data = JSON.parse(text);
+                // 生データを表示
+                showRawResponse(rawText);
+
+                // JSONのクリーンアップとフォールバック
+                let cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+                let data = {};
+                
+                try {
+                    data = JSON.parse(cleanText);
+                } catch (parseError) {
+                    console.warn("JSON parse failed, trying regex fallback", parseError);
+                    const keys = ['atk', 'intimidation', 'dmgMul', 'dmgInc', 'critDmg', 'defIgn', 'bossDmg', 'statusDmg', 'highHpDmg', 'lowHpDmg'];
+                    let found = false;
+                    keys.forEach(k => {
+                        const regex = new RegExp(`"${k}"\\s*:\\s*"?([\\d\\.,]+)"?`, 'i');
+                        const match = cleanText.match(regex);
+                        if (match) {
+                            data[k] = match[1].replace(/,/g, '');
+                            found = true;
+                        }
+                    });
+                    if (!found) {
+                        throw new Error("JSONのパースに失敗し、データも抽出できませんでした。\n" + parseError.message);
+                    }
+                }
+
                 Object.keys(data).forEach(key => {
-                    if (data[key] !== null) state.stats[key] = String(data[key]);
+                    if (data[key] !== null && data[key] !== "0" && data[key] !== "") {
+                        const valStr = String(data[key]).replace(/,/g, '');
+                        state.stats[key] = valStr;
+                    }
                 });
 
                 calculateAndRender();
@@ -615,6 +926,9 @@
                 console.error(err);
                 aiStatusContainer.classList.add('hidden');
                 showAnalysisError("AI解析エラー", err.message);
+                if (rawText) {
+                    showRawResponse(rawText);
+                }
             }
         }
 
@@ -664,8 +978,10 @@
             mainReferenceImg.src = '';
             mainReferenceImg.style.display = 'none';
             refImageSection.classList.add('hidden');
+            aiRawResponseContainer.classList.add('hidden');
         });
 
+        // スクリーンショット保存処理
         btnScreenshot.addEventListener('click', async () => {
             document.body.style.cursor = 'wait';
             const ssLayoutRoot = document.getElementById('screenshot-layout-root');
@@ -674,64 +990,119 @@
             ssLeftCol.innerHTML = '';
             ssRightCol.innerHTML = '';
 
-            const headerClone = document.getElementById('ui-header').cloneNode(true);
-            headerClone.className = "border-b border-slate-800 pb-1 mb-1";
-            const h1 = headerClone.querySelector('h1');
-            if (h1) h1.style.cssText = "background:none !important; color:#22d3ee !important; -webkit-text-fill-color:#22d3ee !important; font-size:14px !important; line-height:1 !important;";
-            headerClone.querySelector('p')?.remove();
-            headerClone.querySelector('#current-time').querySelector('i')?.remove();
-            const memoTextarea = headerClone.querySelector('textarea');
-            if (memoTextarea) {
-                const val = document.getElementById('input-memo-header').value.trim();
-                const display = document.createElement('div');
-                display.className = "text-[7px] text-slate-400 font-mono text-left whitespace-pre-wrap leading-tight mt-1 px-1 border-l border-slate-800";
-                display.textContent = val || "";
-                if (!val) display.style.display = 'none';
-                memoTextarea.parentNode.replaceChild(display, memoTextarea);
+            // Header (Rebuild cleanly)
+            const headerClone = document.createElement('div');
+            headerClone.className = "border-b border-slate-800 pb-2 mb-2 flex flex-col items-center gap-1 w-full";
+            
+            const h1Clone = document.createElement('h1');
+            h1Clone.className = "font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center justify-center ss-no-wrap";
+            h1Clone.style.cssText = "font-size: 14px !important; line-height: 1 !important; margin: 0;";
+            h1Clone.innerHTML = `<i data-lucide="flame" class="text-cyan-400" style="width: 14px !important; height: 14px !important; margin-right: 4px !important;"></i>AshTale 火力スコアアナライザ`;
+            headerClone.appendChild(h1Clone);
+            
+            const timeInfoClone = document.createElement('div');
+            timeInfoClone.className = "flex items-center text-slate-500 font-mono";
+            timeInfoClone.style.cssText = "font-size: 8px !important; margin: 0; padding: 0;";
+            timeInfoClone.innerHTML = `<i data-lucide="clock" style="width: 8px !important; height: 8px !important; margin-right: 2px !important;"></i>${document.getElementById('time-display').textContent}`;
+            headerClone.appendChild(timeInfoClone);
+
+            const memoVal = document.getElementById('input-memo-header').value.trim();
+            if (memoVal) {
+                const memoDisplay = document.createElement('div');
+                memoDisplay.className = "text-[7px] text-slate-400 font-mono text-left whitespace-pre-wrap leading-tight mt-1 px-1 border-l border-slate-800 w-full";
+                memoDisplay.textContent = memoVal;
+                headerClone.appendChild(memoDisplay);
             }
-            headerClone.querySelector('button')?.remove();
             ssLeftCol.appendChild(headerClone);
 
-            const statusClone = document.getElementById('ui-status').cloneNode(true);
-            statusClone.className = "bg-slate-900/50 border border-slate-800 rounded-sm p-2 flex-1";
-            statusClone.querySelector('h2').className = "text-[8px] font-bold text-slate-400 mb-1 ss-no-wrap";
-            statusClone.querySelectorAll('.flex.justify-between').forEach(row => {
-                const input = row.querySelector('input');
-                if (input) {
-                    const val = input.value || "0";
-                    const display = document.createElement('div');
-                    display.className = "text-[9px] font-mono font-bold text-slate-100 flex items-center justify-end h-full";
-                    display.textContent = val;
-                    input.parentNode.replaceChild(display, input);
-                    row.className = "flex justify-between items-center py-1 px-1 border-b border-slate-800/40";
-                    const label = row.querySelector('label');
-                    if (label) {
-                        label.className = "text-[8px] text-slate-500 ss-no-wrap flex items-center";
-                        const icon = label.querySelector('i');
-                        if (icon) icon.style.cssText = "width:10px !important; height:10px !important; margin-right:4px !important;";
-                    }
-                }
+            // Status (Rebuild cleanly)
+            const statusClone = document.createElement('div');
+            statusClone.className = "bg-slate-900/50 border border-slate-800 rounded-sm p-2 flex-1 w-full";
+            statusClone.innerHTML = `<h2 class="text-[8px] font-bold text-slate-400 mb-1 ss-no-wrap flex items-center">現在のステータス</h2>`;
+            
+            const grid = document.createElement('div');
+            grid.className = "flex flex-col gap-0";
+            
+            const statsOrder = [
+                {id: 'atk', label: '攻撃力', icon: 'sword'},
+                {id: 'intimidation', label: '威圧', icon: 'eye'},
+                {id: 'dmgMul', label: 'ダメージ倍率', icon: 'zap'},
+                {id: 'dmgInc', label: '与ダメージ増加', icon: 'arrow-up-circle'},
+                {id: 'critDmg', label: '会心ダメージ', icon: 'crosshair'},
+                {id: 'defIgn', label: '防御無視', icon: 'shield-alert'},
+                {id: 'bossDmg', label: '対ボス与ダメ増', icon: 'skull'},
+                {id: 'statusDmg', label: '状態異常与ダメ増', icon: 'zap'},
+                {id: 'highHpDmg', label: '対高HP与ダメ増', icon: 'target'},
+                {id: 'lowHpDmg', label: '対低HP与ダメ増', icon: 'target'}
+            ];
+
+            statsOrder.forEach(stat => {
+                const val = document.getElementById(`input-${stat.id}`).value || "0";
+                const rateEl = document.getElementById(`rate-${stat.id}`);
+                const hasRate = rateEl && !rateEl.classList.contains('hidden') && isAdvancedMode;
+                const rateText = hasRate ? rateEl.textContent : "";
+
+                const row = document.createElement('div');
+                row.className = "flex justify-between items-center py-1 px-1 border-b border-slate-800/40 w-full";
+                
+                let rateHtml = hasRate ? `<span class="text-[6px] text-indigo-400 font-mono font-bold bg-indigo-950/50 px-1 rounded-sm border border-indigo-900/30 mr-1.5">${rateText}</span>` : "";
+
+                row.innerHTML = `
+                    <div class="text-[8px] text-slate-500 ss-no-wrap flex items-center">
+                        <i data-lucide="${stat.icon}" style="width:10px !important; height:10px !important; margin-right:4px !important;"></i>
+                        <span>${stat.label}</span>
+                    </div>
+                    <div class="flex items-center justify-end h-full">
+                        ${rateHtml}
+                        <span class="text-[9px] font-mono font-bold text-slate-100">${val}</span>
+                    </div>
+                `;
+                grid.appendChild(row);
             });
-            statusClone.querySelectorAll('p, #ai-status-container, .hide-on-screenshot').forEach(el => el.remove());
+            statusClone.appendChild(grid);
             ssLeftCol.appendChild(statusClone);
 
-            const resultClone = document.getElementById('ui-result').cloneNode(true);
-            resultClone.className = "bg-slate-900 border border-slate-800 rounded-sm p-2 h-full";
-            resultClone.querySelector('h2').className = "text-[8px] font-bold text-cyan-600 mb-1 ss-no-wrap";
-            const p = state.calculatedPoints;
-            resultClone.querySelector('#results-container').innerHTML = `
-                <div class="flex justify-between px-1 pb-1 text-[6px] font-bold text-slate-700 border-b border-slate-800/30 uppercase tracking-tighter ss-no-wrap"><span>Stat Name</span><span>Req.</span></div>
-                ${createResultRow('攻撃力', p.atk, 'atk', '', true)}${createResultRow('威圧', p.intimidation, 'intimidation', '', true)}${createResultRow('ダメージ倍率', p.dmgMul, 'dmgMul', '%', true)}${createResultRow('与ダメージ増加', p.dmgInc, 'dmgInc', '%', true)}${createResultRow('会心ダメージ', p.critDmg, 'critDmg', '%', true)}${createResultRow('対ボス与ダメ増', p.bossDmg, 'bossDmg', '%', true)}${createResultRow('状態異常与ダメ増', p.statusDmg, 'statusDmg', '%', true)}${createResultRow('対高HP与ダメ増', p.highHpDmg, 'highHpDmg', '%', true)}${createResultRow('対低HP与ダメ増', p.lowHpDmg, 'lowHpDmg', '%', true)}${createResultRow('防御無視', p.defIgn, 'defIgn', '', true)}
+            // Evaluation Table (If active)
+            if (isAdvancedMode) {
+                const evalClone = document.createElement('div');
+                evalClone.className = "bg-slate-900 border border-slate-800 rounded-sm p-2 mb-2 shadow-md w-full";
+                evalClone.innerHTML = `
+                    <h2 class="text-[8px] font-bold text-indigo-400 mb-1 ss-no-wrap flex items-center">
+                        <i data-lucide="bar-chart-2" style="width:10px !important; height:10px !important; margin-right:4px !important;"></i>
+                        ステータス・バランス評価
+                    </h2>
+                    <div class="space-y-0 w-full">
+                        ${generateEvalHtml(true)}
+                    </div>
+                `;
+                ssRightCol.appendChild(evalClone);
+            }
+
+            // Results Table
+            const resultClone = document.createElement('div');
+            resultClone.className = "bg-slate-900 border border-slate-800 rounded-sm p-2 h-full flex-1 w-full";
+            resultClone.innerHTML = `
+                <h2 class="text-[8px] font-bold text-cyan-600 mb-1 ss-no-wrap flex items-center">
+                    <i data-lucide="arrow-up-circle" style="width:10px !important; height:10px !important; margin-right:4px !important;"></i>
+                    火力1%UPに必要なステータス
+                </h2>
+                <div class="space-y-0 w-full">
+                    ${generateResultHtml(true)}
+                </div>
             `;
             ssRightCol.appendChild(resultClone);
+            
+            // Re-initialize icons inside the screenshot layout
+            lucide.createIcons({ root: ssLayoutRoot });
 
             setTimeout(() => {
                 html2canvas(ssLayoutRoot, { backgroundColor: '#020617', scale: 2, logging: false, useCORS: true, width: 450 }).then(canvas => {
                     document.body.style.cursor = 'default';
                     screenshotImage.src = canvas.toDataURL('image/png');
                     screenshotModal.classList.remove('hidden');
-                }).catch(() => {
+                }).catch((err) => {
                     document.body.style.cursor = 'default';
+                    console.error("Screenshot error:", err);
                     alert('保存に失敗しました。');
                 });
             }, 600);
@@ -739,6 +1110,8 @@
 
         btnCloseScreenshotModal.addEventListener('click', () => { screenshotModal.classList.add('hidden'); screenshotImage.src = ''; });
         screenshotModal.addEventListener('click', (e) => { if (e.target === screenshotModal) { screenshotModal.classList.add('hidden'); screenshotImage.src = ''; } });
+        
+        // Initial render
         calculateAndRender();
     </script>
 </body>
